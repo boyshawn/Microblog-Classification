@@ -8,13 +8,17 @@ import java.io.FileWriter;
 import java.util.HashMap;
 
 /*
- * This simple example shows you how to read the data in json format and get the specific field of a data sample.
- * Here, we extract the textual content of a tweet, split a sentence to words, and then convert the words to integer index.
- * For example, the following sentence "AA BB AA CC DD BB" will be converted to "0 1 0 2 3 1"
+ * This simple example shows you how to read the data in json format and get the
+ * specific field of a data sample. Here, we extract the textual content of a
+ * tweet, split a sentence to words, and then convert the words to integer
+ * index. For example, the following sentence "AA BB AA CC DD BB" will be
+ * converted to "0 1 0 2 3 1"
  * 
- * In this example, the words are split only with blank space. Therefore, they may not be actual words: they may contain
- * punctuation, mentions(@someone), URL, etc. You may need to improve this function. Besides, other techniques to process
- * the texts, e.g., removing stop words and low frequency words, could also be applied.
+ * In this example, the words are split only with blank space. Therefore, they
+ * may not be actual words: they may contain punctuation, mentions(@someone),
+ * URL, etc. You may need to improve this function. Besides, other techniques to
+ * process the texts, e.g., removing stop words and low frequency words, could
+ * also be applied.
  * 
  * Enjoy your first Assignment :)
  * 
