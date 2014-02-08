@@ -18,14 +18,21 @@ import java.util.HashMap;
  * 
  * Enjoy your first Assignment :)
  * 
- * TA: Bian Jingwen (bjwpku@gmail.com)
+ * TA: Bian Jingwen (bjwpku@gmail.com) 
  * 
  */
 
 public class GetWordIndex {
 	
+	static Indexer indexer;
+	static CHIStatSelecter css;
+	
 	public static void main(String args[]){
 		
+		css = new CHIStatSelecter();
+		css.run();
+//		indexer = new Indexer();
+//		indexer.run();
 		// The path of the input file where the original tweets are stored in json format
 		String inputFileName = "dataset/nus/nus_pos.txt";
 		
@@ -46,7 +53,7 @@ public class GetWordIndex {
 				
 				// Convert the input String line to JSONObject
 				JSONObject tweet = new JSONObject(line);
-				
+
 				// Get the "text" field, which saves the textual content of this tweet
 				// Other fields could be fetched similarly
 				String text = tweet.getString("text");
