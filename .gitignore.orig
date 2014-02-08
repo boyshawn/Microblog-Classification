@@ -1,0 +1,18 @@
+<<<<<<< HEAD
+*.class
+*.settings
+*.classpath
+*.metadata
+
+# Package Files #
+*.jar
+*.war
+*.ear
+=======
+*.class
+
+# Package Files #
+*.war
+*.ear
+>>>>>>> e0da5c331a62cea92b29fc9f4bb434ee65f39209
+/bin
