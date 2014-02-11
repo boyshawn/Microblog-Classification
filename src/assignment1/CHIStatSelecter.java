@@ -43,11 +43,11 @@ public class CHIStatSelecter {
 		// Starhub = 1000
 		
 		
-		indexNUS1 = new Indexer("dataset/NUS1.txt", "outputdata/NUS1_textualWords.txt", "NUS1", vectorSize);
-		indexNUS2 = new Indexer("dataset/NUS2.txt", "outputdata/NUS2_textualWords.txt", "NUS2", vectorSize);
-		indexDBS1 = new Indexer("dataset/DBS1.txt", "outputdata/DBS1_textualWords.txt", "DBS1", vectorSize);
-		indexDBS2 = new Indexer("dataset/DBS2.txt", "outputdata/DBS2_textualWords.txt", "DBS2", vectorSize);
-		indexStarhub = new Indexer("dataset/starhub.txt", "outputdata/starhub_textualWords.txt", "Starhub", vectorSize);
+		indexNUS1 = new Indexer("TRAIN/NUS1.txt", "outputdata/NUS1_textualWords.txt", "NUS1", vectorSize);
+		indexNUS2 = new Indexer("TRAIN/NUS2.txt", "outputdata/NUS2_textualWords.txt", "NUS2", vectorSize);
+		indexDBS1 = new Indexer("TRAIN/DBS1.txt", "outputdata/DBS1_textualWords.txt", "DBS1", vectorSize);
+		indexDBS2 = new Indexer("TRAIN/DBS2.txt", "outputdata/DBS2_textualWords.txt", "DBS2", vectorSize);
+		indexStarhub = new Indexer("TRAIN/starhub.txt", "outputdata/starhub_textualWords.txt", "Starhub", vectorSize);
 		
 		indexNUS1.run();
 		indexNUS2.run();
@@ -128,23 +128,28 @@ public class CHIStatSelecter {
 	
         // generate negative vector based on random
         negTermMap = randomNegativeTerms(fm_list, tt_lists);
-        //index.generateVectors("-1", "Training_Vector_NEG/RANDOM_TRAINING_VECTOR_"+index_name+".txt", negTermMap, negativeTermSize);
+        index.generateVectors("-1", "Training_Vector_NEG/RANDOM_TRAINING_VECTOR_"+index_name+".txt", negTermMap, negativeTermSize);
 
 	}
 	
 	private Map<String, Double> randomNegativeTerms(
 			List<Map<String, Integer>> fm_list, List<List<String>> tt_lists) {
 		Map<String, Double> negTermMap = new HashMap<String, Double>();
-		List<Integer> randomIntArray = new ArrayList<Integer>();
 		// generatate random set 
-		for(int i=0;i<tt_lists.get(1).size();i++){
-			randomIntArray.add(i);  // list contains: [0,1,2,3,4,5,6,7,8,9]
-			}
+		List<List<Integer>> randomList = new ArrayList<List<Integer>>();
+		for(int k=0; k<tt_lists.size(); k++){
+			List<Integer> randomIntArray = new ArrayList<Integer>();
+			for(int i=0;i<tt_lists.get(k).size();i++){
+				randomIntArray.add(i);  // list contains: [0,1,2,3,4,5,6,7,8,9]
+				}
 			Collections.shuffle(randomIntArray);
-		
+			randomList.add(randomIntArray);
+		}
 		//keep adding, till reaches negative vector size
         for(int i=0; negTermMap.size()<negativeTermSize; i++ ){
         	List<String> termList = tt_lists.get(i%tt_lists.size());
+        	List<Integer> randomIntArray = randomList.get(i%tt_lists.size());
+        	System.out.println(randomIntArray.size()+" "+i+" "+randomIntArray.get(i));
         	String termToAdd = termList.get(randomIntArray.get(i));
         	//String termToAdd = termList.get(randomIntArray.get(i/tt_lists.size()));
         	if(negTermMap.containsKey(termToAdd)){
