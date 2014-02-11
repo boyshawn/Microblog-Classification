@@ -57,7 +57,7 @@ public class Indexer {
     private Map<String,Integer> frequencyMap;
     private List<String> topTerms ;
 	private String indexDirectory;
-	private int numDocs;
+	private int numDocs, vectorSize;
     
     /** Creates a new instance of Indexer */
     public Indexer() {
@@ -69,13 +69,14 @@ public class Indexer {
 		
     }
     
-    public Indexer(String ifn, String ofn, String index_name) {
+    public Indexer(String ifn, String ofn, String index_name, int vectorSize) {
     	// The path of the input file where the original tweets are stored in json format
 		inputFileName = ifn;
 		// The path of the output file to save the result
 		outputFileName = ofn;
 		indexDirectory = "index-directory_"+index_name;
 		textVectorFileName = "Training_Vector/TRAINING_VECTOR_"+index_name+".txt";
+		this.vectorSize = vectorSize;
     }
     
     public void run(){
@@ -300,10 +301,48 @@ public class Indexer {
     }
     
     public void generateTermVectors(){
+    	generateVectors("+1", textVectorFileName, topTerms.toArray(new String[topTerms.size()]), vectorSize);
+	
+//    	FSDirectory idx;
+//		try {
+//			BufferedWriter writer = new BufferedWriter(new FileWriter(textVectorFileName));
+//			idx = FSDirectory.open(new File(indexDirectory));
+//			searcher = new IndexSearcher(idx); 	
+//	        IndexReader reader = searcher.getIndexReader();
+//	        for(int i=0; i<reader.numDocs(); i++){
+//	        	Document doc = reader.document(i);
+//	        	String docId = doc.get("docId");
+//	        	
+//	        	StringBuilder vectorBuf = new StringBuilder();
+//	        	vectorBuf.append("+1 ");
+//	        	TermFreqVector tfv = reader.getTermFreqVector(i, "text");
+//	        	String[] textArray = tfv.getTerms();
+//	        	System.out.println(textArray.length+ " " +Arrays.toString(textArray));
+//	        	//indicate how many terms in vector
+//	        	for(int j=0; j<vectorSize; j++){
+//	        		vectorBuf.append((j+1) + ":");
+//	        		boolean exist = false;
+//	        		for(String text: textArray){
+//	        			if(topTerms.get(j).equalsIgnoreCase(text)){
+//	        				exist = true;
+//	        				break;
+//	        			}
+//	        		}
+//	        		if(exist) vectorBuf.append("1 ");
+//	        		else vectorBuf.append("0 ");
+//	        	}
+//	        	writer.write(vectorBuf.toString()+"\n");
+//	        }
+//	        writer.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+    }
+    
+    public void generateVectors(String string, String vectorFileName, String[] termVector, int vectorSize){
     	FSDirectory idx;
 		try {
-			int vectorSize = 200;
-			BufferedWriter writer = new BufferedWriter(new FileWriter(textVectorFileName));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(vectorFileName));
 			idx = FSDirectory.open(new File(indexDirectory));
 			searcher = new IndexSearcher(idx); 	
 	        IndexReader reader = searcher.getIndexReader();
@@ -312,16 +351,16 @@ public class Indexer {
 	        	String docId = doc.get("docId");
 	        	
 	        	StringBuilder vectorBuf = new StringBuilder();
-	        	vectorBuf.append("+1 ");
+	        	vectorBuf.append(string+" ");
 	        	TermFreqVector tfv = reader.getTermFreqVector(i, "text");
 	        	String[] textArray = tfv.getTerms();
 	        	System.out.println(textArray.length+ " " +Arrays.toString(textArray));
 	        	//indicate how many terms in vector
-	        	for(int j=0; j<200; j++){
+	        	for(int j=0; j<vectorSize; j++){
 	        		vectorBuf.append((j+1) + ":");
 	        		boolean exist = false;
 	        		for(String text: textArray){
-	        			if(topTerms.get(j).equalsIgnoreCase(text)){
+	        			if(termVector[j].equalsIgnoreCase(text)){
 	        				exist = true;
 	        				break;
 	        			}
@@ -336,4 +375,10 @@ public class Indexer {
 			e.printStackTrace();
 		}
     }
+
+	public void generateVectors(String type, String vectorFileName,
+			Map<String, Double> negTermMap, int negativeTermSize) {
+		String[] termVector = negTermMap.keySet().toArray(new String[negTermMap.keySet().size()]);
+		generateVectors(type, vectorFileName, termVector, negativeTermSize);
+	}
 }

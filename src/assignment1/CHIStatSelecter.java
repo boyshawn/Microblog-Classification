@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +16,23 @@ import assignment1.Indexer;
 
 public class CHIStatSelecter {
 	Indexer indexNUS1, indexNUS2, indexDBS1, indexDBS2, indexStarhub;
-	int catSize;
+	int catSize, vectorSize, negativeTermSize, negSize1, negSize2, negSize3, negSize4;
 	Map<String, Integer> NUS1_df, NUS2_df, DBS1_df, DBS2_df, Starhub_df;
 	List<String> NUS1_tt, NUS2_tt, DBS1_tt, DBS2_tt, Starhub_tt;
 	List<String> NUS1_CHItt, NUS2_CHItt, DBS1_CHItt, DBS2_CHItt, Starhub_CHItt;
 	Map<String, Double> NUS1_CHI, NUS2_CHI, DBS1_CHI, DBS2_CHI, Starhub_CHI;
 	int NUS1_docNum, NUS2_docNum, DBS1_docNum, DBS2_docNum, Starhub_docNum, N; 
+	int[] negSizeArray;
+	
 	public CHIStatSelecter(){
+		catSize = 5;
+		vectorSize = 200;
+		negativeTermSize = 200;
+		negSize1 = 50;
+		negSize2 = 50;
+		negSize3 = 50;
+		negSize4 = 50;
+		negSizeArray = new int[]{negSize1, negSize2, negSize3, negSize4};
 	}
 	
 	public void run(){
@@ -31,12 +42,12 @@ public class CHIStatSelecter {
 		// NUS2 = 300
 		// Starhub = 1000
 		
-		catSize = 5;
-		indexNUS1 = new Indexer("dataset/NUS1.txt", "outputdata/NUS1_textualWords.txt", "NUS1");
-		indexNUS2 = new Indexer("dataset/NUS2.txt", "outputdata/NUS2_textualWords.txt", "NUS2");
-		indexDBS1 = new Indexer("dataset/DBS1.txt", "outputdata/DBS1_textualWords.txt", "DBS1");
-		indexDBS2 = new Indexer("dataset/DBS2.txt", "outputdata/DBS2_textualWords.txt", "DBS2");
-		indexStarhub = new Indexer("dataset/starhub.txt", "outputdata/starhub_textualWords.txt", "Starhub");
+		
+		indexNUS1 = new Indexer("dataset/NUS1.txt", "outputdata/NUS1_textualWords.txt", "NUS1", vectorSize);
+		indexNUS2 = new Indexer("dataset/NUS2.txt", "outputdata/NUS2_textualWords.txt", "NUS2", vectorSize);
+		indexDBS1 = new Indexer("dataset/DBS1.txt", "outputdata/DBS1_textualWords.txt", "DBS1", vectorSize);
+		indexDBS2 = new Indexer("dataset/DBS2.txt", "outputdata/DBS2_textualWords.txt", "DBS2", vectorSize);
+		indexStarhub = new Indexer("dataset/starhub.txt", "outputdata/starhub_textualWords.txt", "Starhub", vectorSize);
 		
 		indexNUS1.run();
 		indexNUS2.run();
@@ -87,17 +98,109 @@ public class CHIStatSelecter {
 		indexDBS1.generateTermVectors();
 		indexDBS2.generateTermVectors();
 		indexStarhub.generateTermVectors();
+		
+		generateNegativeTerms(NUS1_df, NUS1_tt, indexNUS1, "NUS1_NEG", Arrays.asList(NUS2_df, DBS1_df, DBS2_df, Starhub_df), 
+				 Arrays.asList(NUS2_tt, DBS1_tt, DBS2_tt, Starhub_tt));
+		generateNegativeTerms(NUS2_df, NUS2_tt, indexNUS2, "NUS2_NEG", Arrays.asList(NUS1_df, DBS1_df, DBS2_df, Starhub_df), 
+				 Arrays.asList(NUS1_tt, DBS1_tt, DBS2_tt, Starhub_tt));
+		generateNegativeTerms(DBS1_df, DBS1_tt, indexDBS1, "DBS1_NEG", Arrays.asList(NUS1_df, NUS2_df, DBS2_df, Starhub_df), 
+				 Arrays.asList(NUS1_tt, NUS2_tt, DBS2_tt, Starhub_tt));
+		generateNegativeTerms(DBS2_df, DBS2_tt, indexDBS2, "DBS2_NEG", Arrays.asList(NUS1_df, NUS2_df, DBS1_df, Starhub_df), 
+				 Arrays.asList(NUS1_tt, NUS2_tt, DBS1_tt, Starhub_tt));
+		generateNegativeTerms(Starhub_df, Starhub_tt, indexStarhub, "Starhub_NEG", Arrays.asList(NUS1_df, NUS2_df, DBS1_df, DBS2_df), 
+				 Arrays.asList(NUS1_tt, NUS2_tt, DBS1_tt, DBS2_tt));
 	}
 	
+	private void generateNegativeTerms(Map<String, Integer> fm, List<String> tt, Indexer index, String index_name,
+			List<Map<String, Integer>> fm_list, List<List<String>> tt_lists) {
+		String textVectorFileName = "Training_Vector_NEG/TRAINING_VECTOR_"+index_name+".txt";
+		Map<String, Double> negTermMap = new HashMap<String, Double>();
+		ValueComparator bvc =  new ValueComparator(negTermMap);
+        TreeMap<String,Double> sorted_map = new TreeMap<String,Double>(bvc);
+        
+        // generate negative vector based on df
+        negTermMap = mostFrequentNegativeTerms(fm_list, tt_lists);
+        index.generateVectors("-1", "Training_Vector_NEG/TRAINING_VECTOR_"+index_name+".txt", negTermMap, negativeTermSize);
+	
+        // generate based on similar terms to positive
+        negTermMap = similarNegativeTerms(fm, tt, fm_list, tt_lists);
+        index.generateVectors("-1", "Training_Vector_NEG/SIMILAR_TRAINING_VECTOR_"+index_name+".txt", negTermMap, negativeTermSize);
+	
+        // generate negative vector based on random
+        negTermMap = randomNegativeTerms(fm_list, tt_lists);
+        //index.generateVectors("-1", "Training_Vector_NEG/RANDOM_TRAINING_VECTOR_"+index_name+".txt", negTermMap, negativeTermSize);
+
+	}
+	
+	private Map<String, Double> randomNegativeTerms(
+			List<Map<String, Integer>> fm_list, List<List<String>> tt_lists) {
+		Map<String, Double> negTermMap = new HashMap<String, Double>();
+		List<Integer> randomIntArray = new ArrayList<Integer>();
+		// generatate random set 
+		for(int i=0;i<tt_lists.get(1).size();i++){
+			randomIntArray.add(i);  // list contains: [0,1,2,3,4,5,6,7,8,9]
+			}
+			Collections.shuffle(randomIntArray);
+		
+		//keep adding, till reaches negative vector size
+        for(int i=0; negTermMap.size()<negativeTermSize; i++ ){
+        	List<String> termList = tt_lists.get(i%tt_lists.size());
+        	String termToAdd = termList.get(randomIntArray.get(i));
+        	//String termToAdd = termList.get(randomIntArray.get(i/tt_lists.size()));
+        	if(negTermMap.containsKey(termToAdd)){
+        		continue;
+        	}
+        	negTermMap.put(termToAdd, (double)fm_list.get(i%tt_lists.size()).get(termToAdd));
+        }
+        return negTermMap;
+	}
+
+	private Map<String, Double> similarNegativeTerms(Map<String, Integer> fm,
+			List<String> tt, List<Map<String, Integer>> fm_list,
+			List<List<String>> tt_lists) {
+		Map<String, Double> negTermMap = new HashMap<String, Double>();
+		//add similar terms first
+		for(int i=0; (i<tt.size() || negTermMap.size()<negativeTermSize); i++){
+			String termToAdd = tt.get(i);
+			for(Map<String, Integer> freqMap: fm_list){
+				if(freqMap.containsKey(termToAdd)){
+					negTermMap.put(termToAdd, (double)freqMap.get(termToAdd));
+					break;
+				}
+			}
+		}
+		//keep adding, till reaches negative vector size
+        for(int i=0; negTermMap.size()<negativeTermSize; i++ ){
+        	List<String> termList = tt_lists.get(i%tt_lists.size());
+        	String termToAdd = termList.get(i/tt_lists.size());
+        	if(negTermMap.containsKey(termToAdd)){
+        		continue;
+        	}
+        	negTermMap.put(termToAdd, (double)fm_list.get(i%tt_lists.size()).get(termToAdd));
+        }
+        return negTermMap;
+	}
+
+	private Map<String, Double> mostFrequentNegativeTerms(List<Map<String, Integer>> fm_list, List<List<String>> tt_lists) {
+		Map<String, Double> negTermMap = new HashMap<String, Double>();
+		//keep adding, till reaches negative vector size
+        for(int i=0; negTermMap.size()<negativeTermSize; i++ ){
+        	List<String> termList = tt_lists.get(i%tt_lists.size());
+        	String termToAdd = termList.get(i/tt_lists.size());
+        	if(negTermMap.containsKey(termToAdd)){
+        		continue;
+        	}
+        	negTermMap.put(termToAdd, (double)fm_list.get(i%tt_lists.size()).get(termToAdd));
+        }
+        return negTermMap;
+	}
+
 	private void generateTrainingVectors() {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter("NUS_trainingVector.txt"));
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	void printTerms(List<String> topTerms, Map<String, Double> frequencyMap) {
@@ -150,7 +253,7 @@ public class CHIStatSelecter {
 			CHI_MAP.put(W, chi);
 			
 			//check for correct doc sum
-			int NTemp = A+B+C+D;
+//			int NTemp = A+B+C+D;
 //			if(A>38)
 //			System.out.println(((NUS1_docNum + NUS2_docNum + DBS1_docNum + DBS2_docNum + Starhub_docNum)== A+B+C+D )+ 
 //			" total:" + NTemp + " N:" + N + " W:" + W + " A:" + A + " B:" + B + " C:" + C + " D:" + D + " CHI:" + chi);
