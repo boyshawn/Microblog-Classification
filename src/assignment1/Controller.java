@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Controller {
+	private static final int VECTOR_SIZE = 200;
+	
 	private static final String VECTOR_DBS1 = "outputdata/DBS1_vector.txt";
 	private static final String VECTOR_DBS2	 = "outputdata/DBS2_vector.txt";
 	private static final String VECTOR_NUS1 = "outputdata/NUS1_vector.txt";
@@ -37,23 +39,23 @@ public class Controller {
 	private void generateVector(String testDataFile){
 		//Generation of Vector
 		//DBS1
-		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, "DBS1");
+		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, VECTOR_SIZE, "DBS1");
 		indexer.run();
 		
 		//DBS2
-		indexer = new Indexer(testDataFile, VECTOR_DBS2, "DBS2");
+		indexer = new Indexer(testDataFile, VECTOR_DBS2, VECTOR_SIZE, "DBS2");
 		indexer.run();
 		
 		//NUS1
-		indexer = new Indexer(testDataFile, VECTOR_NUS1, "NUS1");
+		indexer = new Indexer(testDataFile, VECTOR_NUS1, VECTOR_SIZE,  "NUS1");
 		indexer.run();
 		
 		//NUS2
-		indexer = new Indexer(testDataFile, VECTOR_NUS2, "NUS2");
+		indexer = new Indexer(testDataFile, VECTOR_NUS2, VECTOR_SIZE, "NUS2");
 		indexer.run();
 		
 		//Starhub
-		indexer = new Indexer(testDataFile, VECTOR_STARHUB, "Starhub");
+		indexer = new Indexer(testDataFile, VECTOR_STARHUB, VECTOR_SIZE, "Starhub");
 		indexer.run();
 	}
 	
