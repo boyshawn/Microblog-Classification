@@ -64,6 +64,7 @@ public class Indexer {
 	private String[] fieldList;
 	private String field;
 	private String index_name;
+	private Vector<String> tweetTextList;
     
     /** Creates a new instance of Indexer */
     public Indexer() {
@@ -90,6 +91,7 @@ public class Indexer {
 		frequencyMap = new HashMap<String,Integer>();
 		
 		topTerms = new ArrayList<String>();
+		tweetTextList = new Vector<String>();
     }
     
     public void run(){
@@ -117,17 +119,17 @@ public class Indexer {
 			//print top terms
 			String[] topTermArray = computeTopTermQuery();
 			//String[] topTermArray = computeTopFieldQuery();
-			FSDirectory idx = FSDirectory.open(new File(indexDirectory));
-			// have to set similarity on both IndexWriter and IndexSearcher
-			searcher = new IndexSearcher(idx);
-			IndexReader reader1 = searcher.getIndexReader();
-			for (int i=0; i<reader1.maxDoc(); i++) {
-			    if (reader1.isDeleted(i))
-			        continue;
-			    Document doc = reader1.document(i);
-			    //System.out.println(doc.get("text"));
-			    // do something with docId here...
-			}
+//			FSDirectory idx = FSDirectory.open(new File(indexDirectory));
+//			// have to set similarity on both IndexWriter and IndexSearcher
+//			searcher = new IndexSearcher(idx);
+//			IndexReader reader1 = searcher.getIndexReader();
+//			for (int i=0; i<reader1.maxDoc(); i++) {
+//			    if (reader1.isDeleted(i))
+//			        continue;
+//			    Document doc = reader1.document(i);
+//			    //System.out.println(doc.get("text"));
+//			    // do something with docId here...
+//			}
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -141,6 +143,7 @@ public class Indexer {
 	        String fieldValue = (tweet.isNull(field)?"": tweet.getString(field));
 	        doc.add(new Field(field, removeStopWords((String)fieldValue), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
 	        indexWriter.addDocument(doc);
+	        tweetTextList.add(fieldValue);
     	}catch(Exception e){
     		e.printStackTrace();
     	}
@@ -306,20 +309,20 @@ public class Indexer {
     	return numDocs;
     }
     
-    public Vector<String> generateTermVectors(){
+    public Vector<Vector<Integer>> generateTermVectors(){
     	int vSize = topTerms.size()>vectorSize ? vectorSize : topTerms.size();
     	return generateVectors("+1", textVectorFileName, topTerms.toArray(new String[topTerms.size()]), vSize);
     }
     
-    public Vector<String> generateTermVectorsWithTopTerms(List<String> newTopTerms, String tt_type){
+    public Vector<Vector<Integer>> generateTermVectorsWithTopTerms(List<String> newTopTerms, String tt_type){
     	int vSize = newTopTerms.size()>vectorSize ? vectorSize : newTopTerms.size();
     	String newName = "Training_Vector/TRAINING_VECTOR_"+tt_type+"("+field+")_"+index_name+".txt";
     	
     	return generateVectors("+1", newName, newTopTerms.toArray(new String[newTopTerms.size()]), vSize);
     }
     
-    public Vector<String> generateVectors(String type, String vectorFileName, String[] termVector, int vectorSize){
-    	Vector<String> tweetVectors = new Vector<String>();
+    public Vector<Vector<Integer>> generateVectors(String type, String vectorFileName, String[] termVector, int vectorSize){
+    	Vector<Vector<Integer>> tweetVectors = new Vector<Vector<Integer>>();
     	FSDirectory idx;
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(vectorFileName));
@@ -331,8 +334,8 @@ public class Indexer {
 	        	StringBuilder vectorBuf = new StringBuilder();
 	        	TermFreqVector tfv = reader.getTermFreqVector(i, field);
 	        	
-	        	
 	        	String[] textArray = (tfv==null)?new String[0]:tfv.getTerms();
+	        	Vector<Integer> vectorValueStore = new Vector<Integer>();
 	        	//TEST
 	        	//System.out.println(textArray.length+ " " +Arrays.toString(textArray));
 	        	//indicate how many terms in vector
@@ -345,10 +348,16 @@ public class Indexer {
 	        				break;
 	        			}
 	        		}
-	        		if(exist) vectorBuf.append("1 ");
-	        		else vectorBuf.append("0 ");
+	        		if(exist){ 
+	        			vectorValueStore.add(1);
+	        			vectorBuf.append("1 ");
+	        		}
+	        		else{ 
+	        			vectorValueStore.add(0);
+	        			vectorBuf.append("0 ");
+	        		}
 	        	}
-	        	tweetVectors.add(vectorBuf.toString());
+	        	tweetVectors.add(vectorValueStore);
 	        	writer.write(type+" "+vectorBuf.toString()+"\n");
 	        }
 	        writer.close();
@@ -358,7 +367,31 @@ public class Indexer {
 		return tweetVectors;
     }
     
-	public Vector<String> generateVectors(String type, String vectorFileName,
+    public IndexReader getReader(){
+    	FSDirectory idx;
+    	IndexReader reader =null;
+		try {
+			idx = FSDirectory.open(new File(indexDirectory));
+			searcher = new IndexSearcher(idx); 	
+	        reader = searcher.getIndexReader();
+		}catch(Exception e){
+		}
+		return reader;
+    }
+    
+    public IndexSearcher getSearcher(){
+    	FSDirectory idx;
+    	IndexReader reader =null;
+		try {
+			idx = FSDirectory.open(new File(indexDirectory));
+			searcher = new IndexSearcher(idx); 	
+	        reader = searcher.getIndexReader();
+		}catch(Exception e){
+		}
+		return searcher;
+    }
+    
+	public Vector<Vector<Integer>> generateVectors(String type, String vectorFileName,
 			Map<String, Double> negTermMap, int negativeTermSize) {
 		String[] termVector = negTermMap.keySet().toArray(new String[negTermMap.keySet().size()]);
 		return generateVectors(type, vectorFileName, termVector, negativeTermSize);

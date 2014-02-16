@@ -37,24 +37,24 @@ public class Controller {
 	private void generateVector(String testDataFile){
 		//Generation of Vector
 		//DBS1
-		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, "DBS1");
-		indexer.run();
-		
-		//DBS2
-		indexer = new Indexer(testDataFile, VECTOR_DBS2, "DBS2");
-		indexer.run();
-		
-		//NUS1
-		indexer = new Indexer(testDataFile, VECTOR_NUS1, "NUS1");
-		indexer.run();
-		
-		//NUS2
-		indexer = new Indexer(testDataFile, VECTOR_NUS2, "NUS2");
-		indexer.run();
-		
-		//Starhub
-		indexer = new Indexer(testDataFile, VECTOR_STARHUB, "Starhub");
-		indexer.run();
+//		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, "DBS1");
+//		indexer.run();
+//		
+//		//DBS2
+//		indexer = new Indexer(testDataFile, VECTOR_DBS2, "DBS2");
+//		indexer.run();
+//		
+//		//NUS1
+//		indexer = new Indexer(testDataFile, VECTOR_NUS1, "NUS1");
+//		indexer.run();
+//		
+//		//NUS2
+//		indexer = new Indexer(testDataFile, VECTOR_NUS2, "NUS2");
+//		indexer.run();
+//		
+//		//Starhub
+//		indexer = new Indexer(testDataFile, VECTOR_STARHUB, "Starhub");
+//		indexer.run();
 	}
 	
 	public void generateTestResult(){
@@ -105,27 +105,28 @@ public class Controller {
 	}
 	
 	private ArrayList<Integer> buildResult(String fileName){
-		File file = new File(fileName);
-		BufferedReader reader = null;
-		ArrayList<Integer> answerList = new ArrayList<>();
-		
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			String answer = reader.readLine();
-		
-			while(answer != null){
-				answerList.add(Integer.getInteger(answer));
-				answer = reader.readLine();
-			}
-			
-			reader.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-				
-		return answerList;
+//		File file = new File(fileName);
+//		BufferedReader reader = null;
+//		ArrayList<Integer> answerList = new ArrayList<>();
+//		
+//		try {
+//			reader = new BufferedReader(new FileReader(file));
+//			String answer = reader.readLine();
+//		
+//			while(answer != null){
+//				answerList.add(Integer.getInteger(answer));
+//				answer = reader.readLine();
+//			}
+//			
+//			reader.close();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//				
+//		return answerList;
+		return null;
 	}
 	
 	public void printToEvaluationFile() throws IOException{
@@ -171,10 +172,10 @@ public class Controller {
 		controller.generateVector(testDataFile);
 		controller.generateTestResult();
 		
-		try {
-			controller.printToEvaluationFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			controller.printToEvaluationFile();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 }
