@@ -384,17 +384,17 @@ public class CHIStatSelecter {
         switch(negType){
         case 0:
         	negDocList.add(getIntList(300));
-        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(1)));
-        	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(2)));
-        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(3)));
-//        	negDocList.add(getRandomIntList(300, 1000));
-//        	negDocList.add(getRandomIntList(100, 200));
-//        	negDocList.add(getRandomIntList(300, 1000));
+//        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(1)));
+//        	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(2)));
+//        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(3)));
+        	negDocList.add(getRandomIntList(300, 1000));
+        	negDocList.add(getRandomIntList(100, 200));
+        	negDocList.add(getRandomIntList(300, 1000));
         	
-        	System.out.println(indexer_list.get(0).getNumDocs() + " " + negDocList.get(0).size()+" 200 ////");
-        	System.out.println(indexer_list.get(1).getNumDocs() + " " + negDocList.get(1).size()+" 350 ////");
-        	System.out.println(indexer_list.get(2).getNumDocs() + " " + negDocList.get(2).size()+" 100 ////");
-        	System.out.println(indexer_list.get(3).getNumDocs() + " " + negDocList.get(3).size()+" 350 ////");
+//        	System.out.println(indexer_list.get(0).getNumDocs() + " " + negDocList.get(0).size()+" 200 ////");
+//        	System.out.println(indexer_list.get(1).getNumDocs() + " " + negDocList.get(1).size()+" 350 ////");
+//        	System.out.println(indexer_list.get(2).getNumDocs() + " " + negDocList.get(2).size()+" 100 ////");
+//        	System.out.println(indexer_list.get(3).getNumDocs() + " " + negDocList.get(3).size()+" 350 ////");
         	break;
         case 1:
         	negDocList.add(getRandomIntList(300, 1000));

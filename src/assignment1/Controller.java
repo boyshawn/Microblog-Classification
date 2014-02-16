@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Controller {
+	private static final int VECTOR_SIZE = 200;
+	
 	private static final String VECTOR_DBS1 = "outputdata/DBS1_vector.txt";
 	private static final String VECTOR_DBS2	 = "outputdata/DBS2_vector.txt";
 	private static final String VECTOR_NUS1 = "outputdata/NUS1_vector.txt";
@@ -165,17 +167,17 @@ public class Controller {
 
 	}
 	
-	public static void main(String[] args){
-		final String testDataFile = "TEST/TEST.txt"; 
-		
-		Controller controller = new Controller();
-		controller.generateVector(testDataFile);
-		controller.generateTestResult();
-		
-//		try {
-//			controller.printToEvaluationFile();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-	}
+//	public static void main(String[] args){
+//		final String testDataFile = "TEST/TEST.txt"; 
+//		
+//		Controller controller = new Controller();
+//		controller.generateVector(testDataFile);
+//		controller.generateTestResult();
+//		
+////		try {
+////			controller.printToEvaluationFile();
+////		} catch (IOException e) {
+////			e.printStackTrace();
+////		}
+//	}
 }
