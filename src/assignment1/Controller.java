@@ -18,11 +18,11 @@ public class Controller {
 	private static final String VECTOR_NUS2 = "outputdata/NUS2_vector.txt";
 	private static final String VECTOR_STARHUB = "outputdata/Starhub_vector.txt";
 	
-	private static String CLASSIFIER_DBS1;
-	private static String CLASSIFIER_DBS2;
-	private static String CLASSIFIER_NUS1;
-	private static String CLASSIFIER_NUS2;
-	private static String CLASSIFIER_STARHUB;
+	private static String CLASSIFIER_DBS1 = "models/vector(text+geoposition+social)DBS1.txt.model";
+	private static String CLASSIFIER_DBS2 = "models/vector(text+geoposition+social)DBS2.txt.model";
+	private static String CLASSIFIER_NUS1 = "models/vector(text+geoposition+social)NUS1.txt.model";
+	private static String CLASSIFIER_NUS2 = "models/vector(text+geoposition+social)NUS2.txt.model";
+	private static String CLASSIFIER_STARHUB = "models/vector(text+geoposition+social)Starhub.txt.model";
 	
 	private static final String TEST_RESULT_DBS1 = "GENERATED-RESULT/Result_DBS1.txt";
 	private static final String TEST_RESULT_DBS2	 = "GENERATED-RESULT/Result_DBS2.txt";
