@@ -36,6 +36,8 @@ public class Controller {
 	private static final String GROUNDTRUTH_NUS2 = "TEST/Groundtruth_NUS2.txt";
 	private static final String GROUNDTRUTH_STARHUB = "TEST/Groundtruth_STARHUB.txt";
 	
+	static CHIStatSelecter css;
+	
 	private void generateVector(String testDataFile){
 		//Generation of Vector
 		//DBS1
@@ -167,17 +169,11 @@ public class Controller {
 
 	}
 	
-//	public static void main(String[] args){
-//		final String testDataFile = "TEST/TEST.txt"; 
-//		
-//		Controller controller = new Controller();
-//		controller.generateVector(testDataFile);
-//		controller.generateTestResult();
-//		
-////		try {
-////			controller.printToEvaluationFile();
-////		} catch (IOException e) {
-////			e.printStackTrace();
-////		}
-//	}
+	public static void main(String[] args){
+		final String testDataFile = "TEST/TEST.txt"; 
+		
+		css = new CHIStatSelecter();
+		css.run();
+
+	}
 }

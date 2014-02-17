@@ -50,8 +50,8 @@ public class CHIStatSelecter {
 	public CHIStatSelecter(){
 		N = 3500; 
 		catSize = 5;
-		vectorSize = 200;
-		negativeTermSize = 200;
+		vectorSize = 500;
+		negativeTermSize = 500;
 		vectorStore = new HashMap<String, Vector<Vector<Integer>>>();
 		topNEGStore = new HashMap<String, Vector<String>>();
 		similarNEGStore = new HashMap<String, Vector<String>>();
@@ -136,11 +136,11 @@ public class CHIStatSelecter {
 
 		//combine CHI basic, geoposition and social 
 		generateCombined("+1", "CHItext_", "CHIgeoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", false);	
-		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", true);	
+		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", true);	
 		
 		//combine CHI basic, geoposition and social 
 		generateCombined("+1", "text_", "geoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", false);	
-		generateCombined("-1", "neg_text_", "neg_geoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", true);	
+		generateCombined("-1", "neg_text_", "neg_geoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", true);	
 
 	}
 	
