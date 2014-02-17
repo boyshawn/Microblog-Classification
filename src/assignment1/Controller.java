@@ -36,27 +36,29 @@ public class Controller {
 	private static final String GROUNDTRUTH_NUS2 = "TEST/Groundtruth_NUS2.txt";
 	private static final String GROUNDTRUTH_STARHUB = "TEST/Groundtruth_STARHUB.txt";
 	
+	static CHIStatSelecter css;
+	
 	private void generateVector(String testDataFile){
 		//Generation of Vector
 		//DBS1
-		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, VECTOR_SIZE, "DBS1");
-		indexer.run();
-		
-		//DBS2
-		indexer = new Indexer(testDataFile, VECTOR_DBS2, VECTOR_SIZE, "DBS2");
-		indexer.run();
-		
-		//NUS1
-		indexer = new Indexer(testDataFile, VECTOR_NUS1, VECTOR_SIZE,  "NUS1");
-		indexer.run();
-		
-		//NUS2
-		indexer = new Indexer(testDataFile, VECTOR_NUS2, VECTOR_SIZE, "NUS2");
-		indexer.run();
-		
-		//Starhub
-		indexer = new Indexer(testDataFile, VECTOR_STARHUB, VECTOR_SIZE, "Starhub");
-		indexer.run();
+//		Indexer indexer = new Indexer(testDataFile, VECTOR_DBS1, "DBS1");
+//		indexer.run();
+//		
+//		//DBS2
+//		indexer = new Indexer(testDataFile, VECTOR_DBS2, "DBS2");
+//		indexer.run();
+//		
+//		//NUS1
+//		indexer = new Indexer(testDataFile, VECTOR_NUS1, "NUS1");
+//		indexer.run();
+//		
+//		//NUS2
+//		indexer = new Indexer(testDataFile, VECTOR_NUS2, "NUS2");
+//		indexer.run();
+//		
+//		//Starhub
+//		indexer = new Indexer(testDataFile, VECTOR_STARHUB, "Starhub");
+//		indexer.run();
 	}
 	
 	public void generateTestResult(){
@@ -107,27 +109,28 @@ public class Controller {
 	}
 	
 	private ArrayList<Integer> buildResult(String fileName){
-		File file = new File(fileName);
-		BufferedReader reader = null;
-		ArrayList<Integer> answerList = new ArrayList<>();
-		
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			String answer = reader.readLine();
-		
-			while(answer != null){
-				answerList.add(Integer.getInteger(answer));
-				answer = reader.readLine();
-			}
-			
-			reader.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-				
-		return answerList;
+//		File file = new File(fileName);
+//		BufferedReader reader = null;
+//		ArrayList<Integer> answerList = new ArrayList<>();
+//		
+//		try {
+//			reader = new BufferedReader(new FileReader(file));
+//			String answer = reader.readLine();
+//		
+//			while(answer != null){
+//				answerList.add(Integer.getInteger(answer));
+//				answer = reader.readLine();
+//			}
+//			
+//			reader.close();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//				
+//		return answerList;
+		return null;
 	}
 	
 	public void printToEvaluationFile() throws IOException{
@@ -169,14 +172,8 @@ public class Controller {
 	public static void main(String[] args){
 		final String testDataFile = "TEST/TEST.txt"; 
 		
-		Controller controller = new Controller();
-		controller.generateVector(testDataFile);
-		controller.generateTestResult();
-		
-		try {
-			controller.printToEvaluationFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		css = new CHIStatSelecter();
+		css.run();
+
 	}
 }

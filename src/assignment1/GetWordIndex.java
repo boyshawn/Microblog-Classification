@@ -31,6 +31,7 @@ public class GetWordIndex {
 		
 		css = new CHIStatSelecter();
 		css.run();
+		//css.generateTestIndex();
 //		indexer = new Indexer();
 //		indexer.run();
 		// The path of the input file where the original tweets are stored in json format
