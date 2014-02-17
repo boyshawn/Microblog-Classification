@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.lucene.analysis.StopAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermFreqVector;
@@ -45,16 +46,18 @@ public class CHIStatSelecter {
 	String[] typeArray = new String[]{"NUS1", "NUS2", "DBS1", "DBS2", "Starhub"}; 
 	Map<String, List<List<String>>> topTermListMap;
 	Map<String, Vector<Vector<Integer>>> vectorStore;
+	Map<String, List<List<Integer>>> negTermStore;
 	public CHIStatSelecter(){
 		N = 3500; 
 		catSize = 5;
-		vectorSize = 500;
-		negativeTermSize = 500;
+		vectorSize = 200;
+		negativeTermSize = 200;
 		vectorStore = new HashMap<String, Vector<Vector<Integer>>>();
 		topNEGStore = new HashMap<String, Vector<String>>();
 		similarNEGStore = new HashMap<String, Vector<String>>();
 		randomNEGStore = new HashMap<String, Vector<String>>();
 		topTermListMap = new HashMap<String, List<List<String>>>();
+		negTermStore = new HashMap<String, List<List<Integer>>>();
 	}
 	
 	public void run(){
@@ -85,23 +88,179 @@ public class CHIStatSelecter {
 //								Arrays.asList("("+type+")_NEG_NUS1", "("+type+")_NEG_NUS2", "("+type+")_NEG_DBS1", "("+type+")_NEG_DBS2", "("+type+")_NEG_Starhub"));
 								Arrays.asList("("+type+")_NUS1", "("+type+")_NUS2", "("+type+")_DBS1", "("+type+")_DBS2", "("+type+")_Starhub"));
 		
+		type = "social";
+		generateSocailFeature(type, Arrays.asList(new Indexer("TRAIN/NUS1.txt", "NUS1", vectorSize, type),
+										new Indexer("TRAIN/NUS2.txt", "NUS2", vectorSize, type),
+										new Indexer("TRAIN/DBS1.txt", "DBS1", vectorSize, type),
+										new Indexer("TRAIN/DBS2.txt", "DBS2", vectorSize, type),
+										new Indexer("TRAIN/starhub.txt", "Starhub", vectorSize, type)
+							), //Array of negative index name 
+							//Arrays.asList("("+type+")_NEG_NUS1", "("+type+")_NEG_NUS2", "("+type+")_NEG_DBS1", "("+type+")_NEG_DBS2", "("+type+")_NEG_Starhub"));
+							Arrays.asList("("+type+")_NUS1", "("+type+")_NUS2", "("+type+")_DBS1", "("+type+")_DBS2", "("+type+")_Starhub"));
+
+		
 		generateTestIndex("text", topTermListMap.get("ttltext"), topTermListMap.get("chittltext"));
 		generateTestIndex("geoposition", topTermListMap.get("chittlgeoposition"), topTermListMap.get("chittlgeoposition"));
+		generateTestSocial();
 		
 		//combine test basic
 		generateCombined("+1", "test_text_", "test_geoposition_", "Test_Vector/", "testvector(text+geoposition)", false);
-		
+
 		//combine test CHI
 		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "Test_Vector/", "testvectorCHI(text+geoposition)", false);
 
-		//combine basic
+		//generate single social test
+		generateCombined("+1", "test_social_", "Test_Vector/", "testvector(social)", false);
+		
+		//combine social test
+		generateCombined("+1", "test_text_", "test_social_", "Test_Vector/", "testvector(text+social)", false);
+		generateCombined("+1", "testchi_text_", "test_social_", "Test_Vector/", "testvectorCHI(text+social)", false);
+		generateCombined("+1", "test_text_", "test_geoposition_", "test_social_", "Test_Vector/", "testvector(text+geoposition+social)", false);
+		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "test_social_", "Test_Vector/", "testvectorCHI(text+geoposition+social)", false);
+		
+		//combine basic and geoposition
 		generateCombined("+1", "text_", "geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", false);	
 		generateCombined("-1", "neg_text_", "neg_geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", true);	
 
-		//combine CHI
+		//combine CHI basic and geoposition
 		generateCombined("+1", "CHItext_", "CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", false);	
 		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", true);	
 
+		//combine basic and social
+		generateCombined("+1", "text_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", false);	
+		generateCombined("-1", "neg_text_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", true);
+		
+		//combine CHI basic and social
+		generateCombined("+1", "CHItext_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", false);	
+		generateCombined("-1", "neg_CHItext_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", true);	
+
+		//combine CHI basic, geoposition and social 
+		generateCombined("+1", "CHItext_", "CHIgeoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", false);	
+		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", true);	
+		
+		//combine CHI basic, geoposition and social 
+		generateCombined("+1", "text_", "geoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", false);	
+		generateCombined("-1", "neg_text_", "neg_geoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", true);	
+
+	}
+	
+	private void generateTestSocial() {
+		Indexer testindex = new Indexer();
+		Map<String, Vector<Vector<Integer>>> tempMap = testindex.generateSocialFeatureForTesting(new File("TEST/test.txt"));
+		System.out.println("TEST SOCIAL " +tempMap.keySet());
+		for(int i=0; i<typeArray.length; i++){
+			String key = typeArray[i];
+			if(key.equalsIgnoreCase("Starhub")) key="STARHUB";
+			Vector<Vector<Integer>> tempV = tempMap.get(key);
+			//System.out.println("TEST SOCIAL V: "+key+" " +tempV);
+			vectorStore.put("test_social_"+typeArray[i], tempV);
+		}
+	}
+
+	private void generateSocailFeature(String type, List<Indexer> indexerList, List<String> negativeFileNameList) {
+		System.out.println("Start social feature");
+		Map<String, Vector<Vector<Integer>>> tempMap;
+		Vector<Vector<Integer>> mainVector;
+		//run index
+		for(int i=0; i<indexerList.size(); i++){
+			Indexer index = indexerList.get(i);
+			//index.run();
+			tempMap = index.generateSocaialFeature(typeArray[i]);
+			
+			//add main to vectorStore
+			mainVector = tempMap.get(typeArray[i]);
+			
+			//generate remaining list
+			List<Vector<Vector<Integer>>> remainList = new ArrayList<Vector<Vector<Integer>>>();
+			System.out.println("social: temp map" + tempMap.keySet());
+			for(int j=0; j<indexerList.size(); j++){
+				if(i==j) continue;
+				remainList.add(tempMap.get(typeArray[j]));
+				System.out.println("social:remain list " + tempMap.get(typeArray[j]).size());
+			}
+						
+			//get negative doc list
+			List<List<Integer>> negList = negTermStore.get(typeArray[i]+"_");
+			
+			//start appending negative terms
+			Vector<Vector<Integer>> negVector = new Vector<Vector<Integer>>();
+			for(int j=0; j<negList.size(); j++){
+				Vector<Vector<Integer>> remainListBasedOnType = remainList.get(j);
+				System.out.println("social:append neg " + remainListBasedOnType.size());
+				List<Integer> negDocNumList = negList.get(j);
+				for(int k=0; k<negDocNumList.size(); k++){
+					int docNum = negDocNumList.get(k);
+					Vector<Integer> featureVector = remainListBasedOnType.get(docNum);
+					negVector.add(featureVector);
+				}
+			}
+			
+			//add main to Vector Store
+			vectorStore.put("social_"+typeArray[i], mainVector);
+			
+			//add neg to Vector Store
+			vectorStore.put("negsocial_"+typeArray[i], negVector);
+			
+			try{
+				BufferedWriter writer = new BufferedWriter(new FileWriter("Training_Vector/TRAINING_VECTOR(social)"+typeArray[i]+".txt"));
+				for(int j=0; j<mainVector.size(); j++){
+					StringBuilder vectorBuf = new StringBuilder();
+					Vector<Integer> vectorValueStore = mainVector.get(j);
+					for(int k=0; k<vectorValueStore.size() && k<vectorSize; k++){
+						vectorBuf.append((k+1) + ":" + vectorValueStore.get(k) + " ");
+					}
+					writer.write("+1"+" "+vectorBuf.toString()+"\n");
+				}
+				
+				for(int j=0; j<negVector.size(); j++){
+					StringBuilder vectorBuf = new StringBuilder();
+					Vector<Integer> vectorValueStore = negVector.get(j);
+					for(int k=0; k<vectorValueStore.size() && k<vectorSize; k++){
+						vectorBuf.append((k+1) + ":" + vectorValueStore.get(k) + " ");
+					}
+					writer.write("-1"+" "+vectorBuf.toString()+"\n");
+				}
+
+				writer.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+
+	//to debug
+	private void generateCombined(String typeSign, List<String> asList,
+			String folder, String name, boolean append) {
+		try {
+			for(int i=0; i<typeArray.length; i++){
+				BufferedWriter writer = new BufferedWriter(new FileWriter(folder+name+typeArray[i]+".txt", append));
+				List<Vector<Vector<Integer>>> pts = new ArrayList<Vector<Vector<Integer>>>();
+				//generate list of pts
+				for(int j=0; j<asList.size(); j++){
+					String key = asList.get(j);
+					pts.add(vectorStore.get(key+typeArray[i]));
+				}
+				
+				int numofrow = pts.get(0).size();
+				for(int j=0; j<numofrow; j++){
+					String appendString = typeSign;
+					//for each pt, append row j
+					int count =1;
+					for(int k=0; k<pts.size(); k++){
+						Vector<Vector<Integer>> pt =pts.get(k);
+						Vector<Integer> pt_row = pt.get(j);
+						System.out.println(j+ " " + k );
+						//for each col in row in pt
+						for(int l=0; l<pt_row.size(); l++){
+							appendString += " "+ count++ +":"+pt.get(l);
+						}
+					}
+					writer.write(appendString);
+				}				
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	private void generateCombined(String typeSign, String key1, String key2, String folder, String name, boolean append) {
@@ -123,7 +282,70 @@ public class CHIStatSelecter {
 						appendString += " "+count+++":"+values1.get(k);
 					}
 					for(int k=0;k<values2.size();k++){
+						appendString += " "+count+++":"+values2.get(k);
+					}
+					writer.write(appendString+"\n");
+				}
+				writer.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+private void generateCombined(String typeSign,  String key1, String folder, String name, boolean append) {
+		
+		try {
+			
+			for(int i=0; i<typeArray.length; i++){
+				BufferedWriter writer = new BufferedWriter(new FileWriter(folder+name+typeArray[i]+".txt", append));
+				Vector<Vector<Integer>> pt1 = vectorStore.get(key1+typeArray[i]);
+				for(int j=0; j<pt1.size(); j++){
+					int count = 1;
+					Vector<Integer> values1 = pt1.get(j);
+					
+					//pt1.get(j).addAll(pt2.get(j));
+					String appendString = typeSign;
+					for(int k=0;k<values1.size();k++){
 						appendString += " "+count+++":"+values1.get(k);
+					}
+					writer.write(appendString+"\n");
+				}
+				writer.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+private void generateCombined(String typeSign, String key1, String key2, String key3, String folder, String name, boolean append) {
+		
+		try {
+			
+			for(int i=0; i<typeArray.length; i++){
+				BufferedWriter writer = new BufferedWriter(new FileWriter(folder+name+typeArray[i]+".txt", append));
+				Vector<Vector<Integer>> pt1 = vectorStore.get(key1+typeArray[i]);
+				Vector<Vector<Integer>> pt2 = vectorStore.get(key2+typeArray[i]);
+				Vector<Vector<Integer>> pt3 = vectorStore.get(key3+typeArray[i]);
+				for(int j=0; j<pt1.size(); j++){
+					int count = 1;
+					Vector<Integer> values1 = pt1.get(j);
+					Vector<Integer> values2 = pt2.get(j);
+					Vector<Integer> values3 = pt3.get(j);
+					
+					//pt1.get(j).addAll(pt2.get(j));
+					String appendString = typeSign;
+					for(int k=0;k<values1.size();k++){
+						appendString += " "+count+++":"+values1.get(k);
+					}
+					for(int k=0;k<values2.size();k++){
+						appendString += " "+count+++":"+values2.get(k);
+					}
+					
+					for(int k=0;k<values3.size();k++){
+						appendString += " "+count+++":"+values3.get(k);
 					}
 					writer.write(appendString+"\n");
 				}
@@ -255,12 +477,12 @@ public class CHIStatSelecter {
 			generateNegativeTerms(i, field, dfMapList.get(i), ttList.get(i), indexerList.get(i), negativeFileNameList.get(i), residueDfMapList, residueTtList, residueIndexList, "");
 			chiMapList.add(generatCHI(dfMapList.get(i), ttList.get(i), docNumList.get(i), residueDfMapList, residueDocNumList));
 			chiTtList.add(generateList(chiMapList.get(i)));
+			
 			//user chiTT to generate terms
 			//System.out.println("CHITT SIZE: "+chiTtList.get(i).get(1));
 			Vector<Vector<Integer>> chiList = indexerList.get(i).generateTermVectorsWithTopTerms(chiTtList.get(i), "CHI");
 			vectorStore.put("CHI"+field+"_"+typeArray[i], chiList); 
 			generateNegativeTerms(i, field, dfMapList.get(i), chiTtList.get(i), indexerList.get(i), negativeFileNameList.get(i), residueDfMapList, residueTtList, residueIndexList, "_CHI");
-			
 		}
 		topTermListMap.put("chittl"+field, chiTtList);
 	}
@@ -358,7 +580,7 @@ public class CHIStatSelecter {
 //        // generate negative vector based on random
 //        negTermMap = randomNegativeTerms(fm_list, tt_lists, minNegSize);
 //        randomNEGStore.put(type, index.generateVectors("-1", "Training_Vector_NEG/RANDOM_TRAINING_VECTOR_"+index_name+".txt", negTermMap, minNegSize));
-
+        
 	}
 	
 	private void generateNegativeTerms(int negType, String field, Map<String, Integer> fm, List<String> tt, Indexer index, String index_name,
@@ -378,43 +600,60 @@ public class CHIStatSelecter {
  		// NUS2 = 300
  		// DBS1 = 1000
  		// DBS2 = 200
- 		// Starhub = 1000
-        List<List<Integer>> negDocList = new ArrayList<List<Integer>>();
+ 		// Starhub = 1000        
+        
         Vector<Vector<Integer>> tweetVectors ;
-        switch(negType){
-        case 0:
-        	negDocList.add(getIntList(300));
-//        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(1)));
-//        	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(2)));
-//        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(3)));
-        	negDocList.add(getRandomIntList(300, 1000));
-        	negDocList.add(getRandomIntList(100, 200));
-        	negDocList.add(getRandomIntList(300, 1000));
-        	
-//        	System.out.println(indexer_list.get(0).getNumDocs() + " " + negDocList.get(0).size()+" 200 ////");
-//        	System.out.println(indexer_list.get(1).getNumDocs() + " " + negDocList.get(1).size()+" 350 ////");
-//        	System.out.println(indexer_list.get(2).getNumDocs() + " " + negDocList.get(2).size()+" 100 ////");
-//        	System.out.println(indexer_list.get(3).getNumDocs() + " " + negDocList.get(3).size()+" 350 ////");
-        	break;
-        case 1:
-        	negDocList.add(getRandomIntList(300, 1000));
-        	break;
-        case 2:;
-	        negDocList.add(getRandomIntList(350, 1000));
-	    	negDocList.add(getRandomIntList(100, 300));
-	    	negDocList.add(getIntList(200));
-	    	negDocList.add(getRandomIntList(350, 1000));
-	    	break;
-        case 3:
-        	negDocList.add(getRandomIntList(200, 1000));
-        	break;
-        case 4:
-        	negDocList.add(getRandomIntList(400, 1000));
-	    	negDocList.add(getRandomIntList(100, 300));
-	    	negDocList.add(getRandomIntList(400, 1000));
-	    	negDocList.add(getRandomIntList(100, 200));
-	    	break;
+        List<List<Integer>> negDocList = new ArrayList<List<Integer>>();
+        if(negTermStore.containsKey(typeArray[negType]+"_")){
+        	negDocList = negTermStore.get(typeArray[negType]+"_");
         }
+        else{
+	        
+	        switch(negType){
+	        case 0:
+	        	negDocList.add(getIntList(300));
+//	        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(1)));
+//	        	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(2)));
+//	        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(3)));
+	        	negDocList.add(getRandomIntList(300, 1000));
+	        	negDocList.add(getRandomIntList(100, 200));
+	        	negDocList.add(getRandomIntList(300, 1000));
+	       
+	//        	System.out.println(indexer_list.get(0).getNumDocs() + " " + negDocList.get(0).size()+" 200 ////");
+	//        	System.out.println(indexer_list.get(1).getNumDocs() + " " + negDocList.get(1).size()+" 350 ////");
+	//        	System.out.println(indexer_list.get(2).getNumDocs() + " " + negDocList.get(2).size()+" 100 ////");
+	//        	System.out.println(indexer_list.get(3).getNumDocs() + " " + negDocList.get(3).size()+" 350 ////");
+	        	break;
+	        case 1:
+	        	negDocList.add(getRandomIntList(300, 1000));
+	        	break;
+	        case 2:;
+//		        negDocList.add(getSimilarIntList(350, 1000, index, indexer_list.get(0)));
+//		    	negDocList.add(getSimilarIntList(100, 300, index, indexer_list.get(1)));
+		    	negDocList.add(getRandomIntList(350, 1000));
+		    	negDocList.add(getRandomIntList(100, 300));
+		    	negDocList.add(getIntList(200));
+		    	negDocList.add(getRandomIntList(350, 1000));
+//		    	negDocList.add(getSimilarIntList(350, 1000, index, indexer_list.get(3)));
+		    	break;
+	        case 3:
+	        	negDocList.add(getRandomIntList(200, 1000));
+	        	break;
+	        case 4:
+	        	negDocList.add(getRandomIntList(400, 1000));
+		    	negDocList.add(getRandomIntList(100, 300));
+		    	negDocList.add(getRandomIntList(400, 1000));
+		    	negDocList.add(getRandomIntList(100, 200));
+//		    	negDocList.add(getSimilarIntList(400, 1000, index, indexer_list.get(0)));
+//		    	negDocList.add(getSimilarIntList(100, 300, index, indexer_list.get(0)));
+//		    	negDocList.add(getSimilarIntList(400, 1000, index, indexer_list.get(0)));
+//		    	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(0)));
+		    	break;
+	        }
+        }
+        //for social feature
+        negTermStore.put(typeArray[negType]+"_"+chi, negDocList);
+        
         tweetVectors = printNegativeVector(field, tt, indexer_list, negDocList, minNegSize, index_name, chi);
         vectorStore.put("neg_"+chi.replace("_", "")+field+"_"+typeArray[negType], tweetVectors);
         
@@ -429,7 +668,7 @@ public class CHIStatSelecter {
 //        // generate negative vector based on random
 //        negTermMap = randomNegativeTerms(fm_list, tt_lists, minNegSize);
 //        randomNEGStore.put(type, index.generateVectors("-1", "Training_Vector_NEG/RANDOM_TRAINING_VECTOR_"+index_name+".txt", negTermMap, minNegSize));
-
+        	
 	}
 	
 	private List<Integer> getSimilarIntList(int want, int has, Indexer mainIndex,
@@ -459,7 +698,7 @@ public class CHIStatSelecter {
 	        	}
 	        	System.out.println("ScoreDoc queryString: " + queryString);
 				if(textArray!=null){
-					Query query = new QueryParser(Version.LUCENE_CURRENT, "text", null).parse(queryString);
+					Query query = new QueryParser(Version.LUCENE_CURRENT, "text", new StandardAnalyzer(Version.LUCENE_36)).parse(queryString);
 					TopDocs similarDocs = getFromSearcher.search(query, want); // Use the searcher
 	//				System.out.println("ScoreDoc Q: "+j+" "+ similarDocs.scoreDocs.length);
 					for(int i=0; i<similarDocs.scoreDocs.length; i++){

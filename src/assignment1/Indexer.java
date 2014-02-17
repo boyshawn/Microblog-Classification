@@ -385,17 +385,10 @@ public class Indexer {
 		return generateVectors(type, vectorFileName, termVector, negativeTermSize);
 	}
 
-	public enum ClassName{
-		NUS1, NUS2, DBS1, DBS2, Starhub
-	}
-	
-	public HashMap<String, Vector<Vector<Integer>>> generateSocaialFeature(String inputClassName){
-		final int TRUE = 1;
-		final int FALSE = 0;
-
+	public HashMap<String, Vector<Vector<Integer>>> generateSocaialFeature(String fileName){
 		String[] handPickRelevantUser = null; 
 
-		if(inputClassName.equalsIgnoreCase("NUS1")){
+		if(fileName.equalsIgnoreCase("NUS1")){
 			handPickRelevantUser = new String[] { "NUSingapore",
 					"NUSLibraries", "nusmba", "NUS_MENA", "NUSCFA", "nusosa",
 					"yalenus", "NUSHistSoc", "NUScomcentre", "NUSCaretalyst",
@@ -405,18 +398,18 @@ public class Indexer {
 					"NUS_IIE", "Mac_NUS", "nusbba", "realFASS", "teamNUS",
 					"RadioPulze", "nusms", "NESociety", "FASSNews" };
 		}
-		else if(inputClassName.equalsIgnoreCase("NUS2")){
+		else if(fileName.equalsIgnoreCase("NUS2")){
 			handPickRelevantUser = new String[] { "NUSnatcon", "The_SA_Blog",
 					"NUS_President", "NUSPhilippines", "nusextra", "nusuk",
 					"thinkposNUS", "NUS_LGBT", "nusScotland", "nusconnect" };
 		}
-		else if(inputClassName.equalsIgnoreCase("DBS1")){
+		else if(fileName.equalsIgnoreCase("DBS1")){
 			handPickRelevantUser = new String[] { "dbsbank", "DBSNUS" };
 		}
-		else if(inputClassName.equalsIgnoreCase("DBS2")){
+		else if(fileName.equalsIgnoreCase("DBS2")){
 			handPickRelevantUser = new String[] { "DBScollege", "DBSLibraryTwits", };
 		}
-		else if(inputClassName.equalsIgnoreCase("STARHUB")){
+		else if(fileName.equalsIgnoreCase("STARHUB")){
 			handPickRelevantUser = new String[] { "StarHub", "StarHubExcites",
 					"StarHubCares", "SH_MobiTweet", "StarHubGee",
 					"StarHubNews", "Starhub_R" };
@@ -425,54 +418,85 @@ public class Indexer {
 		File baseDirectoryToTrainingFolder = new File("TRAIN");
 		File[] trainingFiles = baseDirectoryToTrainingFolder.listFiles();
 		
-		HashMap<String, Vector<Vector<Integer>>> trainingSocialFeatureVectors = new HashMap<String, Vector<Vector<Integer>>>();
-		
+		HashMap<String, Vector<Vector<Integer>>> trainingSocialFeatureVectors =
+				new HashMap<String, Vector<Vector<Integer>>>();
+
 		for(int i = 0; i < trainingFiles.length; i ++){
-			Vector<Vector<Integer>> tweetsUserRelevancy = new Vector<Vector<Integer>>(numDocs);
+			Vector<Vector<Integer>> tweetsUserRelevancy = generateSocialFeatureVectorForOneClass(handPickRelevantUser, trainingFiles[i]);
 			
-			for(int j = 0; j < tweets.size(); j++){
-				try {
-					Integer[] individualTweetSocialFeature = new Integer[handPickRelevantUser.length];
-					JSONObject user = (JSONObject) tweets.get(j).get("user");
-
-					for(int k = 0; k < handPickRelevantUser.length; k ++){
-						String userName = user.getString("screen_name");
-						String text = user.getString("text");
-						//Hot user tweet
-						//Check if the user name of the tweet match any of the hand pick hot user
-
-						if(userName.equals(handPickRelevantUser[k])){
-							individualTweetSocialFeature[k] = TRUE;	//Set as true
-						}
-						//RT OR mention
-						// Check if there is any substring of the hot user in the main
-						// text, as part of mention or retweet 
-						else if(text.toLowerCase().contains(handPickRelevantUser[k])){
-							individualTweetSocialFeature[k] = TRUE;
-
-						}
-						else{
-							individualTweetSocialFeature[k] = FALSE;
-						}
-					}
-
-					Vector<Integer> tweetSocialFeature = new Vector<Integer>(Arrays.asList(individualTweetSocialFeature));
-					tweetsUserRelevancy.add(tweetSocialFeature);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			trainingSocialFeatureVectors.put(inputClassName, tweetsUserRelevancy);
+			String mapName = trainingFiles[i].getName().replace(".txt", "");
+			if(mapName.equalsIgnoreCase("STARHUB")) mapName = "Starhub";
+			trainingSocialFeatureVectors.put(mapName, tweetsUserRelevancy);
 		}
-		
-
-		//Write the file
 		
 		return trainingSocialFeatureVectors;
 	}
-
+	
+	public Vector<Vector<Integer>> generateSocialFeatureVectorForOneClass (String[] handPickRelevantUsers, File trainingFile){
+		Vector<Vector<Integer>> tweetsUserRelevancy = new Vector<Vector<Integer>>();
+		JSONObject tweet = null;
+		
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(trainingFile));
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}	
+		
+		String line;
+		try {
+			while((line = reader.readLine()) != null){
+				// Convert the input String line to JSONObject
+				tweet = new JSONObject(line);
+				Vector<Integer> tweetSocialFeature = generateSocialFeatureForOneTweet(handPickRelevantUsers, tweet);
+				tweetsUserRelevancy.add(tweetSocialFeature);
+			}
+			
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return tweetsUserRelevancy;
+	}
+	
+	public Vector<Integer> generateSocialFeatureForOneTweet (String[] handPickRelevantUsers, JSONObject tweet){
+		final int TRUE = 1;
+		final int FALSE = 0;
+		
+		Integer[] individualTweetSocialFeature = new Integer[handPickRelevantUsers.length];
+		
+		for(int k = 0; k < handPickRelevantUsers.length; k ++){
+			String userName = null;
+			String text = null;
+			
+			try {
+				text = tweet.getString("text");
+				
+				JSONObject user = tweet.getJSONObject("user");
+				userName = user.getString("screen_name");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			//Hot user tweet
+			if(userName.equals(handPickRelevantUsers[k])){
+				individualTweetSocialFeature[k] = TRUE;	//Set as true
+			}
+			//RT OR mention
+			else if(text.toLowerCase().contains(handPickRelevantUsers[k].toLowerCase())){
+				individualTweetSocialFeature[k] = TRUE;
+			}
+			else{
+				individualTweetSocialFeature[k] = FALSE;
+			}
+		}
+		
+		return new Vector<Integer>(Arrays.asList(individualTweetSocialFeature));
+	}
+	
 	// A investigating to see if the most occuring relevant twitter account
+
 	private static Vector<String> generateScreenNamesFromTweet(String fileName) {
 		Vector<String> screenNames = new Vector<String>();
 		HashMap<String, Integer> users = new HashMap<String, Integer>();
@@ -516,7 +540,6 @@ public class Indexer {
 		System.out.println("results: " + sorted_map);
 		return screenNames;
 	}
-
 	 public IndexReader getReader(){
     	FSDirectory idx;
     	IndexReader reader =null;
@@ -540,4 +563,51 @@ public class Indexer {
 		}
 		return searcher;
     }
+    
+    public HashMap<String, Vector<Vector<Integer>>> generateSocialFeatureForTesting(File testingFile){
+		File baseDirectoryToTrainingFolder = new File("TRAIN");
+		File[] trainingFiles = baseDirectoryToTrainingFolder.listFiles();
+		String[] handPickRelevantUser = null;
+		
+		HashMap<String, Vector<Vector<Integer>>> testingSocialFeatureVectors =
+				new HashMap<String, Vector<Vector<Integer>>>();
+		
+		for(int i = 0; i < trainingFiles.length; i ++){
+			String mapName = trainingFiles[i].getName().replace(".txt", "");
+			
+			if(mapName.equalsIgnoreCase("NUS1")){
+				handPickRelevantUser = new String[] { "NUSingapore",
+						"NUSLibraries", "nusmba", "NUS_MENA", "NUSCFA", "nusosa",
+						"yalenus", "NUSHistSoc", "NUScomcentre", "NUSCaretalyst",
+						"fakeNUS", "nushackers", "ActivateUrLife", "NUSSDE",
+						"NUS_Press", "AIESECinNUS", "nuscit", "nuscc", "kr_nus",
+						"NUSBizSchool", "nusfp", "cnmsoc", "USStage", "nusjss",
+						"NUS_IIE", "Mac_NUS", "nusbba", "realFASS", "teamNUS",
+						"RadioPulze", "nusms", "NESociety", "FASSNews" };
+			}
+			else if(mapName.equalsIgnoreCase("NUS2")){
+				handPickRelevantUser = new String[] { "NUSnatcon", "The_SA_Blog",
+						"NUS_President", "NUSPhilippines", "nusextra", "nusuk",
+						"thinkposNUS", "NUS_LGBT", "nusScotland", "nusconnect" };
+			}
+			else if(mapName.equalsIgnoreCase("DBS1")){
+				handPickRelevantUser = new String[] { "dbsbank", "DBSNUS" };
+			}
+			else if(mapName.equalsIgnoreCase("DBS2")){
+				handPickRelevantUser = new String[] { "DBScollege", "DBSLibraryTwits", };
+			}
+			else if(mapName.equalsIgnoreCase("STARHUB")){
+				handPickRelevantUser = new String[] { "StarHub", "StarHubExcites",
+						"StarHubCares", "SH_MobiTweet", "StarHubGee",
+						"StarHubNews", "Starhub_R" };
+			}
+			
+			Vector<Vector<Integer>> tweetsUserRelevancy = generateSocialFeatureVectorForOneClass(
+					handPickRelevantUser, testingFile);
+			
+			testingSocialFeatureVectors.put(mapName, tweetsUserRelevancy);
+		}
+		
+		return testingSocialFeatureVectors;
+	}
 }
