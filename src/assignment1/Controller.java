@@ -12,11 +12,17 @@ import java.util.ArrayList;
 public class Controller {
 	private static final int VECTOR_SIZE = 200;
 	
-	private static final String VECTOR_DBS1 = "outputdata/DBS1_vector.txt";
-	private static final String VECTOR_DBS2	 = "outputdata/DBS2_vector.txt";
-	private static final String VECTOR_NUS1 = "outputdata/NUS1_vector.txt";
-	private static final String VECTOR_NUS2 = "outputdata/NUS2_vector.txt";
-	private static final String VECTOR_STARHUB = "outputdata/Starhub_vector.txt";
+	private static final String VECTOR_DBS1 = "Test_Vector/testvector(text+geoposition+social)DBS1.txt";
+	private static final String VECTOR_DBS2	 = "Test_Vector/testvector(text+geoposition+social)DBS2.txt";
+	private static final String VECTOR_NUS1 = "Test_Vector/testvector(text+geoposition+social)NUS1.txt";
+	private static final String VECTOR_NUS2 = "Test_Vector/testvector(text+geoposition+social)NUS2.txt";
+	private static final String VECTOR_STARHUB = "Test_Vector/testvector(text+geoposition+social)Starhub.txt";
+	
+//	private static final String VECTOR_DBS1 = "outputdata/DBS1_vector.txt";
+//	private static final String VECTOR_DBS2	 = "outputdata/DBS2_vector.txt";
+//	private static final String VECTOR_NUS1 = "outputdata/NUS1_vector.txt";
+//	private static final String VECTOR_NUS2 = "outputdata/NUS2_vector.txt";
+//	private static final String VECTOR_STARHUB = "outputdata/Starhub_vector.txt";
 	
 	private static String CLASSIFIER_DBS1 = "models/vector(text+geoposition+social)DBS1.txt.model";
 	private static String CLASSIFIER_DBS2 = "models/vector(text+geoposition+social)DBS2.txt.model";
@@ -61,7 +67,7 @@ public class Controller {
 //		indexer.run();
 	}
 	
-	public void generateTestResult(){
+	public static void generateTestResult(){
 		//FIXME: to check with michael if the classifier will generate a completed SVM file
 		try {
 			Classifier.generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
@@ -178,6 +184,7 @@ public class Controller {
 		
 		css = new CHIStatSelecter();
 		css.run();
+		generateTestResult();
 
 	}
 }
