@@ -63,11 +63,15 @@ public class Controller {
 	
 	public void generateTestResult(){
 		//FIXME: to check with michael if the classifier will generate a completed SVM file
-		Classifier.generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
-		Classifier.generateTestResult(CLASSIFIER_DBS2, VECTOR_DBS2, TEST_RESULT_DBS2);
-		Classifier.generateTestResult(CLASSIFIER_NUS1, VECTOR_NUS1, TEST_RESULT_NUS1);
-		Classifier.generateTestResult(CLASSIFIER_NUS2, VECTOR_NUS2, TEST_RESULT_NUS2);
-		Classifier.generateTestResult(CLASSIFIER_STARHUB, VECTOR_STARHUB, TEST_RESULT_STARHUB);
+		try {
+			Classifier.generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
+			Classifier.generateTestResult(CLASSIFIER_DBS2, VECTOR_DBS2, TEST_RESULT_DBS2);
+			Classifier.generateTestResult(CLASSIFIER_NUS1, VECTOR_NUS1, TEST_RESULT_NUS1);
+			Classifier.generateTestResult(CLASSIFIER_NUS2, VECTOR_NUS2, TEST_RESULT_NUS2);
+			Classifier.generateTestResult(CLASSIFIER_STARHUB, VECTOR_STARHUB, TEST_RESULT_STARHUB);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private double[] calculateResult(String generatedResultFile, String groundTruthFile){
