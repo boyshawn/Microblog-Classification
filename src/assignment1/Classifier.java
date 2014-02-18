@@ -21,6 +21,9 @@ public class Classifier {
 		try {
 			String line = br.readLine();
 			svm_node[] x = new svm_node[510];
+			for (int i=0; i<x.length; i++){
+				x[i] = new svm_node();
+			}
 			
 			while (line != null){
 				// Create test vector
@@ -35,9 +38,15 @@ public class Classifier {
 					x[i-1].value = Double.valueOf(pt[1]);
 				}
 				
-				double pr = svm.svm_predict(model, x);
-				result.concat(String.valueOf(pr) + "\n");
-				
+				Double pr = svm.svm_predict(model, x);
+//				System.out.println("printing pr:");
+//				System.out.println(pr);
+//				result.concat(String.valueOf(pr) + "\n");
+				result = result + String.valueOf(pr.intValue()) + "\n";
+//				System.out.println("printing valueof pr:");
+//				System.out.println(String.valueOf(pr));
+//				System.out.println("printing result:");
+//				System.out.println(result);
 				line = br.readLine();
 			}
 			
@@ -46,6 +55,8 @@ public class Classifier {
 		}
 		
 		// Write to outputFile
+		System.out.println("Result is:");
+		System.out.println(result);
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 		try{
 			bw.write(result);
@@ -55,4 +66,19 @@ public class Classifier {
 		
 		return;
 	}
+	
+	public static void main(String[] args){
+		
+		String VECTOR_DBS1 = "Test_Vector/vector(text+geoposition+social)DBS1.txt";
+		String CLASSIFIER_DBS1 = "models/vector(text+geoposition+social)DBS1.txt.model";
+		String TEST_RESULT_DBS1 = "GENERATED-RESULT/Result_DBS1.txt";
+		
+		try {
+			generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
 }
