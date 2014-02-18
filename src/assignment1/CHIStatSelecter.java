@@ -51,7 +51,7 @@ public class CHIStatSelecter {
 		N = 3500; 
 		catSize = 5;
 		vectorSize = 500;
-		negativeTermSize = 500;
+		negativeTermSize = vectorSize;
 		vectorStore = new HashMap<String, Vector<Vector<Integer>>>();
 		topNEGStore = new HashMap<String, Vector<String>>();
 		similarNEGStore = new HashMap<String, Vector<String>>();
