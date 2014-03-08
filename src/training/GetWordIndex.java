@@ -1,4 +1,4 @@
-package assignment1;
+package training;
 
 import org.json.JSONObject;
 import java.io.BufferedReader;

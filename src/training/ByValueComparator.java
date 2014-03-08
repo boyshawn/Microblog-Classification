@@ -1,4 +1,4 @@
-package assignment1;
+package training;
 
 import java.util.Comparator;
 import java.util.Map;
