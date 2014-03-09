@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import training.CHIStatSelecter;
-import training.Classifier;
 
 public class Controller {
 	private static final int VECTOR_SIZE = 200;

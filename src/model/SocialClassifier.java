@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-public class SocialRelationshipVector extends HashMap<String, Vector<Integer>>{
+public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 	private static HashMap<String, Vector<Integer>> socialVector = new HashMap<String, Vector<Integer>>();
 
-	public SocialRelationshipVector(Tweets tweets, String[] handpickKeyUser){
+	public SocialClassifier(Tweets tweets, String[] handpickKeyUser){
 		super(socialVector);
 
 		final int TRUE = 1;
