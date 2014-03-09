@@ -12,10 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Tweets {
-	private Vector<Tweet> tweets;
+public class Tweets extends Vector<Tweet>{
 
 	public Tweets(String pathname) {
+		Vector<Tweet> tweets = null;
 		File file = new File(pathname);
 		BufferedReader reader = null;
 
@@ -68,6 +68,8 @@ public class Tweets {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
+		super.elementData = tweets.toArray();
 	}
 
 	private User constructUser(JSONObject tweeter) throws JSONException {
@@ -79,4 +81,5 @@ public class Tweets {
 		User user = new User(id, screenName, location, accountName);
 		return user;
 	}
+	
 }
