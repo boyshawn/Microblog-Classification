@@ -223,7 +223,7 @@ public class Indexer {
 		getIndexWriter(true);
 		closeIndexWriter();
 	}    
-
+	
 	private String[] computeTopTermQuery() throws Exception {
 		FSDirectory idx = FSDirectory.open(new File(indexDirectory));
 		// have to set similarity on both IndexWriter and IndexSearcher
