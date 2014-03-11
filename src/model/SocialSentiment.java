@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-public class SocialClassifier extends HashMap<String, Vector<Integer>>{
-	private static HashMap<String, Vector<Integer>> socialVector = new HashMap<String, Vector<Integer>>();
+public class SocialSentiment extends HashMap<String, Integer>{
+	private static HashMap<String, Integer> socialSentiment = new HashMap<String, Integer>();
 
-	public SocialClassifier(Tweets tweets, String[] handpickKeyUser){
-		super(socialVector);
+	public SocialSentiment(Tweets tweets, String[] handpickKeyUser){
+		super(socialSentiment);
 
 		final int TRUE = 1;
 		final int FALSE = 0;
@@ -18,15 +18,13 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 			Vector<Integer> tweetSocialVector = new Vector<Integer>();
 
 			for(int i = 0; i<handpickKeyUser.length; i++){
-				if(isRelated(tweet, handpickKeyUser[i])){
-					tweetSocialVector.add(TRUE);
+				if(isRelated(tweet, handpickKeyUser)){
+					socialSentiment.put(tweet.tweeter().screenName(), TRUE);
 				}
 				else{
-					tweetSocialVector.add(FALSE);
+					socialSentiment.put(tweet.tweeter().screenName(), FALSE);
 				}
 			}
-
-			socialVector.put(tweet.tweeter().screenName(), tweetSocialVector);
 		}
 	}
 
@@ -48,19 +46,20 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 	 * @return <b>true</b> if the tweet is related to <i>keyUser</i>,
 	 *         <b>false</b> if otherwise.
 	 */
-	private boolean isRelated(Tweet tweet, String keyUser){
+	private boolean isRelated(Tweet tweet, String[] keyUser){
 		boolean related = false;
 
 		String screenName = tweet.tweeter().screenName();
-		if(!(related = screenName.equals(keyUser))){
-			List<User> mentionedUsers = tweet.mentionUser();
+		for (int i = 0; i < keyUser.length; i++) {
+			if(!(related = screenName.equals(keyUser[i]))){
+				List<User> mentionedUsers = tweet.mentionUser();
 
-			for (int i = 0; i < mentionedUsers.size() && !related; i++) {
-				User user = mentionedUsers.get(i);
-				related = user.screenName().equals(keyUser);
+				for (int j = 0; i < mentionedUsers.size() && !related; j++) {
+					User user = mentionedUsers.get(j);
+					related = user.screenName().equals(keyUser[i]);
+				}
 			}
 		}
-		
 		return related;
 	}
 }
