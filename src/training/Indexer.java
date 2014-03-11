@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package assignment1;
+package training;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

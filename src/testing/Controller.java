@@ -1,4 +1,4 @@
-package assignment1;
+package testing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import training.CHIStatSelecter;
 
 public class Controller {
 	private static final int VECTOR_SIZE = 200;

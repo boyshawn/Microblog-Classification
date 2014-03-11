@@ -1,10 +1,9 @@
-package assignment1;
+package training;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +29,7 @@ import org.apache.lucene.search.similar.MoreLikeThis;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import assignment1.Indexer;
+import training.Indexer;
 
 public class CHIStatSelecter {
 	Indexer indexNUS1, indexNUS2, indexDBS1, indexDBS2, indexStarhub,
