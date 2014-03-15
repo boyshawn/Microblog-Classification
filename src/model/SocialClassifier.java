@@ -19,7 +19,7 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 				}
 				else{
 					tweetSocialVector.add(FALSE);
-				}
+				} 
 			}
 			this.put(tweet.tweeter().screenName(), tweetSocialVector);
 		}
