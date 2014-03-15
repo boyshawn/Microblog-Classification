@@ -1,27 +1,42 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class SocialClassifier extends HashMap<String, Vector<Integer>>{
-	public SocialClassifier(Tweets tweets, String[] handpickKeyUser){
-		final int TRUE = 1;
-		final int FALSE = 0;
-
-		for(int j = 0; j < tweets.size(); j ++){
-			Tweet tweet = tweets.get(j);
-			Vector<Integer> tweetSocialVector = new Vector<Integer>();
-
-			for(int i = 0; i<handpickKeyUser.length; i++){
-				if(isRelated(tweet, handpickKeyUser[i])){
-					tweetSocialVector.add(TRUE);
-				}
-				else{
-					tweetSocialVector.add(FALSE);
-				} 
-			}
-			this.put(tweet.tweeter().screenName(), tweetSocialVector);
+	private Set<String> positiveUsers;
+	private Set<String> negativeUsers;
+	
+	public SocialClassifier(Map<String, Tweets> allTweets){
+		Tweets tweets = allTweets.get("negative");
+		negativeUsers = new TreeSet<String>();
+		for(int i =0; i < tweets.size(); i++){
+			Tweet tweet = tweets.get(i);
+			negativeUsers.add(tweet.tweeter().screenName());
+		}
+		
+		tweets = allTweets.get("positive");
+		positiveUsers = new TreeSet<String>();
+		for(int i =0; i < tweets.size(); i++){
+			Tweet tweet = tweets.get(i);
+			positiveUsers.add(tweet.tweeter().screenName());
+		}
+	}
+	
+	public void buildSocialVectorFile(Tweets tweets, String outputFileName){
+		List<Integer> vectorList = new ArrayList<Integer>();
+		
+		for (int i = 0; i < tweets.size(); i++) {
+			Tweet tweet = tweets.get(i);
+			vectorList.addAll(resultListOfATweet(tweet, negativeUsers));
 		}
 	}
 
@@ -43,20 +58,43 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 	 * @return <b>true</b> if the tweet is related to <i>keyUser</i>,
 	 *         <b>false</b> if otherwise.
 	 */
-	private boolean isRelated(Tweet tweet, String keyUser){
-		boolean related = false;
+	private List<Integer> resultListOfATweet(Tweet tweet, Set usersScreenNames){
+		List<Integer> result = new ArrayList<Integer>();
 
-		String screenName = tweet.tweeter().screenName();
-		if (!(related = screenName.equals(keyUser))
-				&& tweet.mentionUser() != null) {
-			List<User> mentionedUsers = tweet.mentionUser();
-
-			for (int i = 0; i < mentionedUsers.size() && !related; i++) {
-				User user = mentionedUsers.get(i);
-				related = user.screenName().equals(keyUser);
+		final int TRUE = 1;
+		final int FALSE = 0;
+		
+		//Build a vector of all the user inside a tweet
+		List<String> tweetUsers = allUsersOfATweet(tweet);
+		
+		Iterator<String> setNameIter = usersScreenNames.iterator();
+		
+		while(setNameIter.hasNext()){
+			String screenName = setNameIter.next();
+			if(tweetUsers.contains(screenName)){
+				result.add(TRUE);
+			}else{
+				result.add(FALSE);
 			}
 		}
+		return result;	//Stub
+	}
+	
+	private List<String> allUsersOfATweet(Tweet tweet){
+		List<String> users = new ArrayList<String>();
 
-		return related;
+		//Poster
+		users.add(tweet.tweeter().screenName());
+		
+		//Mentioned user
+		List<User> mentionedUsers = tweet.mentionUser();
+		
+		if(mentionedUsers != null){
+			for (int i = 0; i < mentionedUsers.size(); i++) {
+				users.add(mentionedUsers.get(i).screenName());
+			}
+		}
+		
+		return users;
 	}
 }

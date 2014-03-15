@@ -21,13 +21,13 @@ public class TestDriver {
 				"TwitterMusic", "TwitterAds", "international", "TwitterUK",
 				"TwitterSmallBiz", "gov" };
 		
-		SocialClassifier socialClassifier= new SocialClassifier(tweets, twitterKeyUser); 
-		
-		if(socialClassifier == null){
-			System.out.println("Social class is empty.");
-		}
-		
-		System.out.println(socialClassifier.toString());
+//		SocialClassifier socialClassifier= new SocialClassifier(tweets, twitterKeyUser); 
+////		
+////		if(socialClassifier == null){
+////			System.out.println("Social class is empty.");
+////		}
+////		
+////		System.out.println(socialClassifier.toString());
 		
 //		BufferedWriter writer = null;
 //		//File
