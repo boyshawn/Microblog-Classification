@@ -70,7 +70,6 @@ public class Tweets extends Vector<Tweet>{
 		super.elementData = new Tweet[tweets.size()];
 		java.lang.System.arraycopy(tweets.toArray(), 0, super.elementData, 0, tweets.size());
 		super.elementCount = tweets.size();
-		System.out.println("Size of elementData: " + super.elementData.length);
 	}
 
 	private User constructUser(JSONObject tweeter) throws JSONException {

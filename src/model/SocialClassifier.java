@@ -5,11 +5,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class SocialClassifier extends HashMap<String, Vector<Integer>>{
-	private static HashMap<String, Vector<Integer>> socialVector = new HashMap<String, Vector<Integer>>();
-
 	public SocialClassifier(Tweets tweets, String[] handpickKeyUser){
-		super(socialVector);
-
 		final int TRUE = 1;
 		final int FALSE = 0;
 
@@ -25,8 +21,7 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 					tweetSocialVector.add(FALSE);
 				}
 			}
-
-			socialVector.put(tweet.tweeter().screenName(), tweetSocialVector);
+			this.put(tweet.tweeter().screenName(), tweetSocialVector);
 		}
 	}
 
@@ -52,7 +47,8 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 		boolean related = false;
 
 		String screenName = tweet.tweeter().screenName();
-		if(!(related = screenName.equals(keyUser))){
+		if (!(related = screenName.equals(keyUser))
+				&& tweet.mentionUser() != null) {
 			List<User> mentionedUsers = tweet.mentionUser();
 
 			for (int i = 0; i < mentionedUsers.size() && !related; i++) {
@@ -60,7 +56,7 @@ public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 				related = user.screenName().equals(keyUser);
 			}
 		}
-		
+
 		return related;
 	}
 }
