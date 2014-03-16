@@ -18,5 +18,8 @@ public class TemporalDriver {
 //		//Social Sentiment
 //		SocialSentiment socialSentiment = new SocialSentiment(baseFilePath);
 //		socialSentiment.writeSocialVectorFile();
+		
+		Tweets tweets = new Tweets(baseFilePath + "neg_apple.txt");
+		System.out.println(tweets.get(0).date());
 	}
 }

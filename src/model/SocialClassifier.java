@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 public class SocialClassifier extends HashMap<String, Vector<Integer>>{
 	private Set<String> positiveUsers;
 	private Set<String> negativeUsers;
