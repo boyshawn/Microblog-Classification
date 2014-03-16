@@ -1,65 +1,62 @@
 package model;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
+import org.apache.commons.collections15.map.HashedMap;
+
 public class SocialSentiment extends HashMap<String, Integer>{
-	private static HashMap<String, Integer> socialSentiment = new HashMap<String, Integer>();
 
-	public SocialSentiment(Tweets tweets, String[] handpickKeyUser){
-		super(socialSentiment);
+	public static void writeSocialVectorFile(){
+		String baseFilePath = "C:\\Users\\Francis Pang\\Google Drive\\Acadmic folder\\CS4242 Social Media\\Assignment 2 classified Tweet JSON\\";
+		String baseWritePath = "C:\\Users\\Francis Pang\\Google Drive\\Acadmic folder\\CS4242 Social Media\\Assignment 2 Social Vector\\";
 
-		final int TRUE = 1;
-		final int FALSE = 0;
+		/***********   Building Social Classifier *******************/
+		//Apple
+		SocialClassifier appleSocialClassifier = createSocialClassifier(baseFilePath + "pos_apple.txt", baseFilePath + "neg_apple.txt");
+		//Google
+		SocialClassifier googleSocialClassifier = createSocialClassifier(baseFilePath + "pos_google.txt", baseFilePath + "neg_google.txt");
+		//Microsoft
+		SocialClassifier microsoftSocialClassifier = createSocialClassifier(baseFilePath + "pos_microsoft.txt", baseFilePath + "neg_microsoft.txt");
+		//Twitter
+		SocialClassifier twitterSocialClassifier = createSocialClassifier(baseFilePath + "pos_twitter.txt", baseFilePath + "neg_twitter.txt");
 
-		for(int j = 0; j < tweets.size(); j ++){
-			Tweet tweet = tweets.get(j);
-			Vector<Integer> tweetSocialVector = new Vector<Integer>();
+		/************    Writing vector files *********************/
+		File baseDir = new File(baseFilePath);
+		File[] fileContent = baseDir.listFiles();
 
-			for(int i = 0; i<handpickKeyUser.length; i++){
-				if(isRelated(tweet, handpickKeyUser)){
-					socialSentiment.put(tweet.tweeter().screenName(), TRUE);
-				}
-				else{
-					socialSentiment.put(tweet.tweeter().screenName(), FALSE);
-				}
+		for (int i = 1; i < fileContent.length; i++) {
+			Tweets tweets = new Tweets(fileContent[i].getAbsolutePath());
+
+			String[] split = fileContent[i].getName().split("[_.]");
+
+			if("apple".equals(split[1])){
+				appleSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
+			}
+			else if("google".equals(split[1])){
+				googleSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
+			}
+			else if("microsoft".equals(split[1])){
+				microsoftSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
+			}
+			else if("twitter".equals(split[1])){
+				twitterSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
 			}
 		}
 	}
 
-	/**
-	 * <p>
-	 * Check if a tweet is related to the key user. A related tweet is defined
-	 * to be one of the following: <br/>
-	 * <ul>
-	 * <li>a tweet sent by the key user himself</li>
-	 * <li>The poster of the tweet retweet the tweet sent by key user</li>
-	 * <li>The tweet mention the key user</li>
-	 * </ul>
-	 * </p>
-	 * 
-	 * @param tweet
-	 *            the specific tweet to be checked upon
-	 * @param keyUser
-	 *            the key user that is to be checked against
-	 * @return <b>true</b> if the tweet is related to <i>keyUser</i>,
-	 *         <b>false</b> if otherwise.
-	 */
-	private boolean isRelated(Tweet tweet, String[] keyUser){
-		boolean related = false;
+	private static SocialClassifier createSocialClassifier(String positiveFileName, String negativeFileName){
+		Map<String, Tweets> allTweets = new HashedMap<String, Tweets>();
 
-		String screenName = tweet.tweeter().screenName();
-		for (int i = 0; i < keyUser.length; i++) {
-			if(!(related = screenName.equals(keyUser[i]))){
-				List<User> mentionedUsers = tweet.mentionUser();
+		Tweets tweets = new Tweets(negativeFileName);
+		allTweets.put("negative", tweets);
 
-				for (int j = 0; i < mentionedUsers.size() && !related; j++) {
-					User user = mentionedUsers.get(j);
-					related = user.screenName().equals(keyUser[i]);
-				}
-			}
-		}
-		return related;
+		tweets = new Tweets(positiveFileName);
+		allTweets.put("positive", tweets);
+
+		return new SocialClassifier(allTweets);
 	}
 }
