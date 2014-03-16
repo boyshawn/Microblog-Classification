@@ -14,6 +14,10 @@ import org.json.JSONObject;
 
 public class Tweets extends Vector<Tweet>{
 
+	public Tweets(){
+		super();
+	}
+	
 	public Tweets(String pathname) {
 		Vector<Tweet> tweets = new Vector<Tweet>();
 		File file = new File(pathname);

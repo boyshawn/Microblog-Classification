@@ -9,20 +9,11 @@ import java.util.Vector;
 import org.apache.commons.collections15.map.HashedMap;
 
 public class SocialSentiment extends HashMap<String, Integer>{
+	private SocialClassifier socialClassifier;
 
-	public static void writeSocialVectorFile(){
+	public void writeSocialVectorFile(){
 		String baseFilePath = "C:\\Users\\Francis Pang\\Google Drive\\Acadmic folder\\CS4242 Social Media\\Assignment 2 classified Tweet JSON\\";
 		String baseWritePath = "C:\\Users\\Francis Pang\\Google Drive\\Acadmic folder\\CS4242 Social Media\\Assignment 2 Social Vector\\";
-
-		/***********   Building Social Classifier *******************/
-		//Apple
-		SocialClassifier appleSocialClassifier = createSocialClassifier(baseFilePath + "pos_apple.txt", baseFilePath + "neg_apple.txt");
-		//Google
-		SocialClassifier googleSocialClassifier = createSocialClassifier(baseFilePath + "pos_google.txt", baseFilePath + "neg_google.txt");
-		//Microsoft
-		SocialClassifier microsoftSocialClassifier = createSocialClassifier(baseFilePath + "pos_microsoft.txt", baseFilePath + "neg_microsoft.txt");
-		//Twitter
-		SocialClassifier twitterSocialClassifier = createSocialClassifier(baseFilePath + "pos_twitter.txt", baseFilePath + "neg_twitter.txt");
 
 		/************    Writing vector files *********************/
 		File baseDir = new File(baseFilePath);
@@ -30,33 +21,34 @@ public class SocialSentiment extends HashMap<String, Integer>{
 
 		for (int i = 1; i < fileContent.length; i++) {
 			Tweets tweets = new Tweets(fileContent[i].getAbsolutePath());
-
-			String[] split = fileContent[i].getName().split("[_.]");
-
-			if("apple".equals(split[1])){
-				appleSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
-			}
-			else if("google".equals(split[1])){
-				googleSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
-			}
-			else if("microsoft".equals(split[1])){
-				microsoftSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
-			}
-			else if("twitter".equals(split[1])){
-				twitterSocialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName());
-			}
+			socialClassifier.buildSocialVectorFile(tweets, baseWritePath + fileContent[i].getName()); 
 		}
 	}
-
-	private static SocialClassifier createSocialClassifier(String positiveFileName, String negativeFileName){
-		Map<String, Tweets> allTweets = new HashedMap<String, Tweets>();
-
-		Tweets tweets = new Tweets(negativeFileName);
-		allTweets.put("negative", tweets);
-
-		tweets = new Tweets(positiveFileName);
-		allTweets.put("positive", tweets);
-
-		return new SocialClassifier(allTweets);
+	
+	public SocialSentiment(String baseDirectory){
+		super();
+		
+		File baseDir = new File(baseDirectory);
+		File[] fileContent = baseDir.listFiles();
+		
+		Tweets positiveTweets = new Tweets();
+		Tweets negativeTweets = new Tweets();
+		
+		for (int i = 1; i < fileContent.length; i++) {
+			Tweets tweets = new Tweets(fileContent[i].getAbsolutePath()); 
+					
+			if(fileContent[i].getName().contains("neg")){
+				negativeTweets.addAll(tweets);
+			}
+			else if (fileContent[i].getName().contains("pos")){
+				positiveTweets.addAll(tweets);
+			}
+		}
+		
+		Map<String, Tweets> map = new HashedMap<String, Tweets>();
+		map.put("positive", positiveTweets);
+		map.put("negative", negativeTweets);
+		
+		this.socialClassifier = new SocialClassifier(map);
 	}
 }
