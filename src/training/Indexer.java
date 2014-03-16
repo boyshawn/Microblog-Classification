@@ -115,6 +115,7 @@ public class Indexer {
 			String line;
 			while((line = reader.readLine()) != null){
 				// Convert the input String line to JSONObject
+				//System.out.println(line);
 				JSONObject tweet = new JSONObject(line);
 				tweets.add(tweet);
 

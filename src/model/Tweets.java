@@ -14,8 +14,10 @@ import org.json.JSONObject;
 
 public class Tweets extends Vector<Tweet>{
 
+	Vector<Tweet> tweets;
+	
 	public Tweets(String pathname) {
-		Vector<Tweet> tweets = null;
+		tweets = new Vector<Tweet>();
 		File file = new File(pathname);
 		BufferedReader reader = null;
 
@@ -32,10 +34,11 @@ public class Tweets extends Vector<Tweet>{
 				JSONObject newTweet = new JSONObject(line);
 
 				String text = newTweet.getString("text");
-				String geolocation = newTweet.getString("geoposition");
-
-				JSONObject dateObject = newTweet.getJSONObject("created_at");
-				String date = dateObject.getString("$date");
+//				String geolocation = (newTweet.isNull("geo")?"": newTweet.getString("geo"));
+				String geolocation = newTweet.getString("text");
+				
+				String date = newTweet.getString("created_at");
+//				String date = dateObject.getString("$date");
 
 				JSONObject newTweeter = newTweet.getJSONObject("user");
 				User tweetPoster = constructUser(newTweeter);
@@ -75,11 +78,15 @@ public class Tweets extends Vector<Tweet>{
 	private User constructUser(JSONObject tweeter) throws JSONException {
 		int id = tweeter.getInt("id");
 		String screenName = tweeter.getString("screen_name");
-		String location = tweeter.getString("location");
+		String location = (tweeter.isNull("location")?"": tweeter.getString("location"));
 		String accountName = tweeter.getString("name");
 
 		User user = new User(id, screenName, location, accountName);
 		return user;
+	}
+	
+	public Vector<Tweet> getTweets(){
+		return tweets;
 	}
 	
 }

@@ -17,7 +17,7 @@ public class Tweet {
 	// Constructor
 	public Tweet(String text, String date, String geolocation, User tweeter) {
 		this.text = text;
-		this.date = new SimpleDateFormat(date);
+//		this.date = new SimpleDateFormat(date);
 		this.geolocation = geolocation;
 		this.tweeter = tweeter;
 	}
@@ -25,7 +25,7 @@ public class Tweet {
 	public Tweet(String text, String date, String geolocation, User tweeter,
 			List<User> mentionedUsers) {
 		this.text = text;
-		this.date = new SimpleDateFormat(date);
+//		this.date = new SimpleDateFormat(date);
 		this.geolocation = geolocation;
 		this.tweeter = tweeter;
 		this.mentionedUsers = mentionedUsers;

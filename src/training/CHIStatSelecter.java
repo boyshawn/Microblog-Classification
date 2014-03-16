@@ -1,9 +1,12 @@
 package training;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import model.Tweets;
 
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -28,6 +33,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similar.MoreLikeThis;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.util.packed.PackedInts.Reader;
 
 import training.Indexer;
 
@@ -42,13 +48,14 @@ public class CHIStatSelecter {
 	int NUS1_docNum, NUS2_docNum, DBS1_docNum, DBS2_docNum, Starhub_docNum, N; 
 	int[] negSizeArray;
 	Map<String, Vector<String>> topNEGStore, similarNEGStore, randomNEGStore;
-	String[] typeArray = new String[]{"NUS1", "NUS2", "DBS1", "DBS2", "Starhub"}; 
+	String[] typeArray = new String[]{"apple", "google", "microsoft", "twitter"}; 
 	Map<String, List<List<String>>> topTermListMap;
 	Map<String, Vector<Vector<Integer>>> vectorStore;
 	Map<String, List<List<Integer>>> negTermStore;
+	
 	public CHIStatSelecter(){
 		N = 3500; 
-		catSize = 5;
+		catSize = 4;
 		vectorSize = 350;
 		negativeTermSize = 350;
 		vectorStore = new HashMap<String, Vector<Vector<Integer>>>();
@@ -59,90 +66,106 @@ public class CHIStatSelecter {
 		negTermStore = new HashMap<String, List<List<Integer>>>();
 	}
 	
+	
+
 	public void run(){
-		// NUS1 = 1000
-		// NUS2 = 300
-		// DBS1 = 1000
-		// DBS2 = 200
-		// Starhub = 1000
 		String type;
 		
 		type = "text";
-		generateTextVector(type, Arrays.asList(new Indexer("TRAIN/NUS1.txt", "NUS1", vectorSize, type),
-										new Indexer("TRAIN/NUS2.txt", "NUS2", vectorSize, type),
-										new Indexer("TRAIN/DBS1.txt", "DBS1", vectorSize, type),
-										new Indexer("TRAIN/DBS2.txt", "DBS2", vectorSize, type),
-										new Indexer("TRAIN/starhub.txt", "Starhub", vectorSize, type)
+		generateTextVector(type, Arrays.asList(new Indexer("TRAIN/apple.txt", "apple", vectorSize, type),
+										new Indexer("TRAIN/google.txt", "google", vectorSize, type),
+										new Indexer("TRAIN/microsoft.txt", "microsoft", vectorSize, type),
+										new Indexer("TRAIN/twitter.txt", "twitter", vectorSize, type)
 							), //Array of negative index name 
 							//Arrays.asList("("+type+")_NEG_NUS1", "("+type+")_NEG_NUS2", "("+type+")_NEG_DBS1", "("+type+")_NEG_DBS2", "("+type+")_NEG_Starhub"));
-							Arrays.asList("("+type+")_NUS1", "("+type+")_NUS2", "("+type+")_DBS1", "("+type+")_DBS2", "("+type+")_Starhub"));
+							Arrays.asList("("+type+")_apple", "("+type+")_google", "("+type+")_microsoft", "("+type+")_twitter"));
 		
-		type = "geoposition";
-		generateTextVector(type, Arrays.asList(new Indexer("TRAIN/NUS1.txt", "NUS1", vectorSize, type),
-										new Indexer("TRAIN/NUS2.txt", "NUS2", vectorSize, type),
-										new Indexer("TRAIN/DBS1.txt", "DBS1", vectorSize, type),
-										new Indexer("TRAIN/DBS2.txt", "DBS2", vectorSize, type),
-										new Indexer("TRAIN/starhub.txt", "Starhub", vectorSize, type)
-								), //Array of negative index name 
-//								Arrays.asList("("+type+")_NEG_NUS1", "("+type+")_NEG_NUS2", "("+type+")_NEG_DBS1", "("+type+")_NEG_DBS2", "("+type+")_NEG_Starhub"));
-								Arrays.asList("("+type+")_NUS1", "("+type+")_NUS2", "("+type+")_DBS1", "("+type+")_DBS2", "("+type+")_Starhub"));
+		saveTopTerms(topTermListMap.get("ttltext"));
 		
-		type = "social";
-		generateSocailFeature(type, Arrays.asList(new Indexer("TRAIN/NUS1.txt", "NUS1", vectorSize, type),
-										new Indexer("TRAIN/NUS2.txt", "NUS2", vectorSize, type),
-										new Indexer("TRAIN/DBS1.txt", "DBS1", vectorSize, type),
-										new Indexer("TRAIN/DBS2.txt", "DBS2", vectorSize, type),
-										new Indexer("TRAIN/starhub.txt", "Starhub", vectorSize, type)
-							), //Array of negative index name 
-							//Arrays.asList("("+type+")_NEG_NUS1", "("+type+")_NEG_NUS2", "("+type+")_NEG_DBS1", "("+type+")_NEG_DBS2", "("+type+")_NEG_Starhub"));
-							Arrays.asList("("+type+")_NUS1", "("+type+")_NUS2", "("+type+")_DBS1", "("+type+")_DBS2", "("+type+")_Starhub"));
-
-		
-		generateTestIndex("text", topTermListMap.get("ttltext"), topTermListMap.get("chittltext"));
-		generateTestIndex("geoposition", topTermListMap.get("chittlgeoposition"), topTermListMap.get("chittlgeoposition"));
-		generateTestSocial();
-		
-		//combine test basic
-		generateCombined("+1", "test_text_", "test_geoposition_", "Test_Vector/", "testvector(text+geoposition)", false);
-
-		//combine test CHI
-		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "Test_Vector/", "testvectorCHI(text+geoposition)", false);
-
-		//generate single social test
-		generateCombined("+1", "test_social_", "Test_Vector/", "testvector(social)", false);
-		
-		//combine social test
-		generateCombined("+1", "test_text_", "test_social_", "Test_Vector/", "testvector(text+social)", false);
-		generateCombined("+1", "testchi_text_", "test_social_", "Test_Vector/", "testvectorCHI(text+social)", false);
-		generateCombined("+1", "test_text_", "test_geoposition_", "test_social_", "Test_Vector/", "testvector(text+geoposition+social)", false);
-		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "test_social_", "Test_Vector/", "testvectorCHI(text+geoposition+social)", false);
-		
-		//combine basic and geoposition
-		generateCombined("+1", "text_", "geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", false);	
-		generateCombined("-1", "neg_text_", "neg_geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", true);	
-
-		//combine CHI basic and geoposition
-		generateCombined("+1", "CHItext_", "CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", false);	
-		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", true);	
-
-		//combine basic and social
-		generateCombined("+1", "text_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", false);	
-		generateCombined("-1", "neg_text_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", true);
-		
-		//combine CHI basic and social
-		generateCombined("+1", "CHItext_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", false);	
-		generateCombined("-1", "neg_CHItext_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", true);	
-
-		//combine CHI basic, geoposition and social 
-		generateCombined("+1", "CHItext_", "CHIgeoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", false);	
-		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", true);	
-		
-		//combine CHI basic, geoposition and social 
-		generateCombined("+1", "text_", "geoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", false);	
-		generateCombined("-1", "neg_text_", "neg_geoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", true);	
+//		generateTestIndex("text", topTermListMap.get("ttltext"), topTermListMap.get("chittltext"));
+//		generateTestIndex("geoposition", topTermListMap.get("chittlgeoposition"), topTermListMap.get("chittlgeoposition"));
+//		generateTestSocial();
+//		
+//		//combine test basic
+//		generateCombined("+1", "test_text_", "test_geoposition_", "Test_Vector/", "testvector(text+geoposition)", false);
+//
+//		//combine test CHI
+//		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "Test_Vector/", "testvectorCHI(text+geoposition)", false);
+//
+//		//generate single social test
+//		generateCombined("+1", "test_social_", "Test_Vector/", "testvector(social)", false);
+//		
+//		//combine social test
+//		generateCombined("+1", "test_text_", "test_social_", "Test_Vector/", "testvector(text+social)", false);
+//		generateCombined("+1", "testchi_text_", "test_social_", "Test_Vector/", "testvectorCHI(text+social)", false);
+//		generateCombined("+1", "test_text_", "test_geoposition_", "test_social_", "Test_Vector/", "testvector(text+geoposition+social)", false);
+//		generateCombined("+1", "testchi_text_", "testchi_geoposition_", "test_social_", "Test_Vector/", "testvectorCHI(text+geoposition+social)", false);
+//		
+//		//combine basic and geoposition
+//		generateCombined("+1", "text_", "geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", false);	
+//		generateCombined("-1", "neg_text_", "neg_geoposition_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition)_", true);	
+//
+//		//combine CHI basic and geoposition
+//		generateCombined("+1", "CHItext_", "CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", false);	
+//		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition)_", true);	
+//
+//		//combine basic and social
+//		generateCombined("+1", "text_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", false);	
+//		generateCombined("-1", "neg_text_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+social)_", true);
+//		
+//		//combine CHI basic and social
+//		generateCombined("+1", "CHItext_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", false);	
+//		generateCombined("-1", "neg_CHItext_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+social)_", true);	
+//
+//		//combine CHI basic, geoposition and social 
+//		generateCombined("+1", "CHItext_", "CHIgeoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", false);	
+//		generateCombined("-1", "neg_CHItext_", "neg_CHIgeoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR_CHI(text+geoposition+social)_", true);	
+//		
+//		//combine CHI basic, geoposition and social 
+//		generateCombined("+1", "text_", "geoposition_", "social_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", false);	
+//		generateCombined("-1", "neg_text_", "neg_geoposition_", "negsocial_", "Training_Vector/", "TRAINING_VECTOR(text+geoposition+social)_", true);	
 
 	}
 	
+	private void saveTopTerms(List<List<String>> list) {
+		try{
+			for(int i=0; i<list.size(); i++){
+				PrintWriter tw = new PrintWriter(new FileWriter("SAVED/ttltext"+i));
+				List<String> tl = list.get(i);
+				for(String term:tl){
+					tw.println(term);
+				}
+				tw.close();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	public void loadTrainingFeature() {
+		try{
+			List<List<String>> alltl = new ArrayList<List<String>>();
+			for(int i=0; i<4; i++){
+				BufferedReader reader = new BufferedReader(new FileReader("SAVED/ttltext"+i));
+				List<String> tl = new ArrayList<String>();
+				String line;
+				while((line = reader.readLine()) != null){
+					tl.add(line);
+				}
+				alltl.add(tl);
+				System.out.println(i+": "+tl.size());
+				reader.close();
+			}
+			topTermListMap.put("ttltext", alltl);
+		}catch(Exception e){
+		}
+		
+	}
+
+	public void generateTestIndex() {
+		generateTestIndex("text", topTermListMap.get("ttltext"), topTermListMap.get("chittltext"));
+	}
+
 	private void generateTestSocial() {
 		Indexer testindex = new Indexer();
 		Map<String, Vector<Vector<Integer>>> tempMap = testindex.generateSocialFeatureForTesting(new File("TEST/test.txt"));
@@ -362,12 +385,11 @@ private void generateCombined(String typeSign, String key1, String key2, String 
 		Indexer testIndex = new Indexer("TEST/test.txt", "TEST", vectorSize, field);
 		testIndex.run();
 		IndexReader tesReader = testIndex.getReader();
-		String textVectorFileName = "Test_Vector/testvector.txt";
 				
 		System.out.println("TEST"+ttList.size() + " " + testIndex.getNumDocs());
 		try{
 			for(int i=0; i<ttList.size(); i++){
-				BufferedWriter writer = new BufferedWriter(new FileWriter("Test_Vector/testvector("+field+")"+typeArray[i]+".txt"));
+				BufferedWriter writer = new BufferedWriter(new FileWriter("Test_Vector/class/testvector("+field+")"+typeArray[i]+".txt"));
 				List<String> tt = ttList.get(i);
 				vStore = new Vector<Vector<Integer>>();
 				for(int j=0; j<testIndex.getNumDocs(); j++){
@@ -398,41 +420,6 @@ private void generateCombined(String typeSign, String key1, String key2, String 
 				}
 				writer.close();
 				vectorStore.put("test_"+field+"_"+typeArray[i], vStore);
-			}
-			
-			//repaeat with chi vetors
-			for(int i=0; i<chittList.size(); i++){
-				BufferedWriter writer = new BufferedWriter(new FileWriter("Test_Vector/testvectorCHI("+field+")"+typeArray[i]+".txt"));
-				List<String> tt = chittList.get(i);
-				vStore = new Vector<Vector<Integer>>();
-				for(int j=0; j<testIndex.getNumDocs(); j++){
-					StringBuilder vectorBuf = new StringBuilder();
-					TermFreqVector tfv = tesReader.getTermFreqVector(j, field);
-					String[] textArray = (tfv==null)?new String[0]:tfv.getTerms();
-					Vector<Integer> vectorValueStore = new Vector<Integer>();
-					for(int k=0; k<tt.size() && k<vectorSize; k++){
-						vectorBuf.append((k+1) + ":");
-		        		boolean exist = false;
-		        		for(String text: textArray){
-		        			if(tt.get(k).equalsIgnoreCase(text)){
-		        				exist = true;
-		        				break;
-		        			}
-		        		}
-		        		if(exist){ 
-		        			vectorValueStore.add(1);
-		        			vectorBuf.append("1 ");
-		        		}
-		        		else{ 
-		        			vectorValueStore.add(0);
-		        			vectorBuf.append("0 ");
-		        		}
-					}
-					vStore.add(vectorValueStore);
-					writer.write("+1"+" "+vectorBuf.toString()+"\n");
-				}
-				writer.close();
-				vectorStore.put("testchi_"+field+"_"+typeArray[i], vStore);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -595,11 +582,10 @@ private void generateCombined(String typeSign, String key1, String key2, String 
         	if(ttList.size() < minNegSize) minNegSize = ttList.size(); 
         }
         //negative document List
-        // NUS1 = 1000
- 		// NUS2 = 300
- 		// DBS1 = 1000
- 		// DBS2 = 200
- 		// Starhub = 1000        
+        // apple = 621
+ 		// google = 271
+ 		// microsoft = 535
+ 		// twitter = 412  
         
         Vector<Vector<Integer>> tweetVectors ;
         List<List<Integer>> negDocList = new ArrayList<List<Integer>>();
@@ -610,13 +596,12 @@ private void generateCombined(String typeSign, String key1, String key2, String 
 	        
 	        switch(negType){
 	        case 0:
-	        	negDocList.add(getIntList(300));
 //	        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(1)));
 //	        	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(2)));
 //	        	negDocList.add(getSimilarIntList(300, 1000, index, indexer_list.get(3)));
-	        	negDocList.add(getRandomIntList(300, 1000));
-	        	negDocList.add(getRandomIntList(100, 200));
-	        	negDocList.add(getRandomIntList(300, 1000));
+	        	negDocList.add(getRandomIntList(121, 271));
+	        	negDocList.add(getRandomIntList(300, 535));
+	        	negDocList.add(getRandomIntList(200, 412));
 	       
 	//        	System.out.println(indexer_list.get(0).getNumDocs() + " " + negDocList.get(0).size()+" 200 ////");
 	//        	System.out.println(indexer_list.get(1).getNumDocs() + " " + negDocList.get(1).size()+" 350 ////");
@@ -624,30 +609,20 @@ private void generateCombined(String typeSign, String key1, String key2, String 
 	//        	System.out.println(indexer_list.get(3).getNumDocs() + " " + negDocList.get(3).size()+" 350 ////");
 	        	break;
 	        case 1:
-	        	negDocList.add(getRandomIntList(300, 1000));
+	        	negDocList.add(getRandomIntList(100, 621));
+	        	negDocList.add(getRandomIntList(100, 535));
+	        	negDocList.add(getRandomIntList(100, 412));
 	        	break;
-	        case 2:;
-//		        negDocList.add(getSimilarIntList(350, 1000, index, indexer_list.get(0)));
-//		    	negDocList.add(getSimilarIntList(100, 300, index, indexer_list.get(1)));
-		    	negDocList.add(getRandomIntList(350, 1000));
-		    	negDocList.add(getRandomIntList(100, 300));
-		    	negDocList.add(getIntList(200));
-		    	negDocList.add(getRandomIntList(350, 1000));
-//		    	negDocList.add(getSimilarIntList(350, 1000, index, indexer_list.get(3)));
+	        case 2:
+	        	negDocList.add(getRandomIntList(235, 621));	   
+		        negDocList.add(getRandomIntList(100, 271));
+	        	negDocList.add(getRandomIntList(200, 412));
 		    	break;
 	        case 3:
-	        	negDocList.add(getRandomIntList(200, 1000));
+	        	negDocList.add(getRandomIntList(200, 621));	   
+		        negDocList.add(getRandomIntList(100, 271));
+	        	negDocList.add(getRandomIntList(112, 535));
 	        	break;
-	        case 4:
-	        	negDocList.add(getRandomIntList(400, 1000));
-		    	negDocList.add(getRandomIntList(100, 300));
-		    	negDocList.add(getRandomIntList(400, 1000));
-		    	negDocList.add(getRandomIntList(100, 200));
-//		    	negDocList.add(getSimilarIntList(400, 1000, index, indexer_list.get(0)));
-//		    	negDocList.add(getSimilarIntList(100, 300, index, indexer_list.get(0)));
-//		    	negDocList.add(getSimilarIntList(400, 1000, index, indexer_list.get(0)));
-//		    	negDocList.add(getSimilarIntList(100, 200, index, indexer_list.get(0)));
-		    	break;
 	        }
         }
         //for social feature
