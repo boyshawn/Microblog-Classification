@@ -17,7 +17,7 @@ public class Tweets extends Vector<Tweet>{
 	Vector<Tweet> tweets;
 	
 	public Tweets(String pathname) {
-		Vector<Tweet> tweets = new Vector<Tweet>();
+		tweets = new Vector<Tweet>();
 		File file = new File(pathname);
 		BufferedReader reader = null;
 
@@ -91,6 +91,10 @@ public class Tweets extends Vector<Tweet>{
 
 		User user = new User(id, screenName, location, accountName);
 		return user;
+	}
+
+	public Vector<Tweet> getTweets() {
+		return tweets;
 	}
 
 }
