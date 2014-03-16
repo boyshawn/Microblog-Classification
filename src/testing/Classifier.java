@@ -12,10 +12,9 @@ public class Classifier {
 		
 	}
 	
-	public static String generateModel(String inputFile) throws IOException{
-		
+	public static String generateModel(String inputFilePath) throws IOException{
 		svm_train t = new svm_train();
-		String arr[] = {inputFile};
+		String arr[] = {inputFilePath};
 		t.run(arr);
 		
 		return t.model_file_name;
