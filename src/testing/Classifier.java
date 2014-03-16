@@ -12,6 +12,14 @@ public class Classifier {
 		
 	}
 	
+	public static String generateModel(String inputFilePath) throws IOException{
+		svm_train t = new svm_train();
+		String arr[] = {inputFilePath};
+		t.run(arr);
+		
+		return t.model_file_name;
+	}
+	
 	public static void generateTestResult(String classifier, String inputFile, String outputFile) throws IOException{
 		
 		svm_model model = svm.svm_load_model(classifier);
@@ -69,9 +77,9 @@ public class Classifier {
 	
 	public static void main(String[] args){
 		
-		String VECTOR_DBS1 = "Test_Vector/testvector(text+geoposition+social)DBS2.txt";
+		String VECTOR_DBS1 = "Test_Vector/vector(text+geoposition+social)DBS1.txt";
 		String CLASSIFIER_DBS1 = "models/vector(text+geoposition+social)DBS1.txt.model";
-		String TEST_RESULT_DBS1 = "GENERATED-RESULT/Result_newthing.txt";
+		String TEST_RESULT_DBS1 = "GENERATED-RESULT/Result_DBS1.txt";
 		
 		try {
 			generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
