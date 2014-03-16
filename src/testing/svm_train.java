@@ -1,4 +1,4 @@
-package assignment1;
+package testing;
 
 import libsvm.*;
 import java.io.*;
@@ -9,7 +9,7 @@ class svm_train {
 	private svm_problem prob;		// set by read_problem
 	private svm_model model;
 	private String input_file_name;		// set by parse_command_line
-	private String model_file_name;		// set by parse_command_line
+	public String model_file_name;		// set by parse_command_line
 	private String error_msg;
 	private int cross_validation;
 	private int nr_fold;

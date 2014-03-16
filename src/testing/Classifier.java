@@ -12,6 +12,15 @@ public class Classifier {
 		
 	}
 	
+	public static String generateModel(String inputFile) throws IOException{
+		
+		svm_train t = new svm_train();
+		String arr[] = {inputFile};
+		t.run(arr);
+		
+		return t.model_file_name;
+	}
+	
 	public static void generateTestResult(String classifier, String inputFile, String outputFile) throws IOException{
 		
 		svm_model model = svm.svm_load_model(classifier);

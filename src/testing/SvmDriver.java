@@ -1,4 +1,4 @@
-package assignment1;
+package testing;
 
 import java.io.IOException;
 
