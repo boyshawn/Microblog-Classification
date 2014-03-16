@@ -92,6 +92,12 @@ public class NewSentimentHarvester {
 						selectedTokens.add(token);
 						adjcount++;
 					}
+					if (token.tag.equalsIgnoreCase("#")){
+						token.tag = "A"; // treat hashtags 
+						selectedTokens.add(token);
+						adjcount++;
+					}
+					
 					//System.out.printf("%s\t%s\n", token.tag, token.token);
 				}
 				
