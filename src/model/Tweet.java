@@ -6,26 +6,29 @@ import java.util.List;
 public class Tweet {
 	// Attribute
 	private String text;
-	private SimpleDateFormat date;
+	private String date;
 
 	private String geolocation;
 	private User tweeter;
+	private long id;
 
 	private boolean isRetweet;
 	private List<User> mentionedUsers;
 
 	// Constructor
-	public Tweet(String text, String date, String geolocation, User tweeter) {
+	public Tweet(long id2, String text, String date, String geolocation, User tweeter) {
+		this.id = id2;
 		this.text = text;
-//		this.date = new SimpleDateFormat(date);
+		this.date = date;
 		this.geolocation = geolocation;
 		this.tweeter = tweeter;
 	}
 
-	public Tweet(String text, String date, String geolocation, User tweeter,
+	public Tweet(long id2, String text, String date, String geolocation, User tweeter,
 			List<User> mentionedUsers) {
+		this.id = id2;
 		this.text = text;
-//		this.date = new SimpleDateFormat(date);
+		this.date = date;
 		this.geolocation = geolocation;
 		this.tweeter = tweeter;
 		this.mentionedUsers = mentionedUsers;
@@ -33,11 +36,15 @@ public class Tweet {
 	}
 
 	// Method
+	public long id(){
+		return id;
+	}
+	
 	public String text() {
 		return text;
 	}
 
-	public SimpleDateFormat date() {
+	public String date() {
 		return date;
 	}
 

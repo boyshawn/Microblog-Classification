@@ -17,7 +17,7 @@ public class Tweets extends Vector<Tweet>{
 	Vector<Tweet> tweets;
 	
 	public Tweets(String pathname) {
-		tweets = new Vector<Tweet>();
+		Vector<Tweet> tweets = new Vector<Tweet>();
 		File file = new File(pathname);
 		BufferedReader reader = null;
 
@@ -32,13 +32,10 @@ public class Tweets extends Vector<Tweet>{
 		try {
 			while ((line = reader.readLine()) != null) {
 				JSONObject newTweet = new JSONObject(line);
-
-				String text = newTweet.getString("text");
-//				String geolocation = (newTweet.isNull("geo")?"": newTweet.getString("geo"));
-				String geolocation = newTweet.getString("text");
 				
+				long id = newTweet.getLong("id");
+				String text = newTweet.getString("text");
 				String date = newTweet.getString("created_at");
-//				String date = dateObject.getString("$date");
 
 				JSONObject newTweeter = newTweet.getJSONObject("user");
 				User tweetPoster = constructUser(newTweeter);
@@ -57,13 +54,13 @@ public class Tweets extends Vector<Tweet>{
 						User user = constructUser(mentionedUser);
 						mentionedUsers.add(user);
 					}
-
-					tweet = new Tweet(text, date, geolocation, tweetPoster,
+					//FIXME: Write in report: use poster location because there is no geolocation for this data set.
+					tweet = new Tweet(id, text, date, tweetPoster.location(), tweetPoster,
 							mentionedUsers);
 				} else {
-					tweet = new Tweet(text, date, geolocation, tweetPoster);
+					tweet = new Tweet(id, text, date, tweetPoster.location(), tweetPoster);
 				}
-
+				
 				tweets.add(tweet);
 			}
 		} catch (IOException e) {
@@ -72,21 +69,28 @@ public class Tweets extends Vector<Tweet>{
 			e.printStackTrace();
 		}
 		
-		super.elementData = tweets.toArray();
+		super.elementData = new Tweet[tweets.size()];
+		java.lang.System.arraycopy(tweets.toArray(), 0, super.elementData, 0, tweets.size());
+		super.elementCount = tweets.size();
 	}
 
 	private User constructUser(JSONObject tweeter) throws JSONException {
 		int id = tweeter.getInt("id");
 		String screenName = tweeter.getString("screen_name");
-		String location = (tweeter.isNull("location")?"": tweeter.getString("location"));
-		String accountName = tweeter.getString("name");
+		
+		String location = "";
+		if(tweeter.has("location")){
+			location = tweeter.getString("location");
+		}
+		
+		String accountName = "";
+		
+		if(tweeter.has("name")){
+			accountName = tweeter.getString("name");
+		}
 
 		User user = new User(id, screenName, location, accountName);
 		return user;
 	}
-	
-	public Vector<Tweet> getTweets(){
-		return tweets;
-	}
-	
+
 }
