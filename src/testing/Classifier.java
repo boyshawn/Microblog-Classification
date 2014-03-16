@@ -28,17 +28,19 @@ public class Classifier {
 		BufferedReader br = new BufferedReader(new FileReader(inputFile));
 		try {
 			String line = br.readLine();
-			svm_node[] x = new svm_node[510];
+			svm_node[] x = new svm_node[15000];
 			for (int i=0; i<x.length; i++){
 				x[i] = new svm_node();
 			}
-			
+			int count=0;
 			while (line != null){
+				count++;
 				// Create test vector
+				line = line.replace("  ", " ");
 				String[] parts = line.split(" ");
 				for (int i=1; i<parts.length; i++){
 					if (!parts[i].contains(":")){
-						System.out.print("Error! Vector does not contain ':' separator!");
+						System.out.print("Error! Vector does not contain ':' separator! count:"+count+" col:"+i+" "+parts[i]);
 						return;
 					}
 					String[] pt = parts[i].split(":");

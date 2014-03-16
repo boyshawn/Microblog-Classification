@@ -8,3 +8,5 @@
 *.ear
 /bin
 /Test_Vector
+/model
+/TESTING_VECTOR
