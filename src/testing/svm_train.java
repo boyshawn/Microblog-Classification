@@ -33,7 +33,7 @@ class svm_train {
 		else
 		{
 			model = svm.svm_train(prob,param);
-			svm.svm_save_model(model_file_name,model);
+			svm.svm_save_model("model/"+model_file_name,model);
 		}
 	}
 

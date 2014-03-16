@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import model.Tweet;
 import model.Tweets;
 
 import training.CHIStatSelecter;
@@ -38,7 +39,132 @@ public class Controller {
 //	private static final String TEST_RESULT_NUS2 = "GENERATED-RESULT/Result_NUS2.txt";
 //	private static final String TEST_RESULT_STARHUB = "GENERATED-RESULT/Result_STARHUB.txt";
 	
-	private static final String VECTOR_APPLE = "Test_Vector/test/testvector(text)apple.txt";
+	// VECTOR
+	private static final String VECTOR_APPLE_P_b = "Test_Vector/apple_p(basic).txt";
+	private static final String VECTOR_APPLE_P_bs = "Test_Vector/apple_p(basic+social).txt";
+	private static final String VECTOR_APPLE_P_bh = "Test_Vector/apple_p(basic+harvest).txt";
+	private static final String VECTOR_APPLE_P_bhs = "Test_Vector/apple_p(basic+harvest+social).txt";
+	
+	private static final String VECTOR_APPLE_NG_b = "Test_Vector/apple_ng(basic).txt";
+	private static final String VECTOR_APPLE_NG_bs = "Test_Vector/apple_ng(basic+social).txt";
+	private static final String VECTOR_APPLE_NG_bh = "Test_Vector/apple_ng(basic+harvest).txt";
+	private static final String VECTOR_APPLE_NG_bhs = "Test_Vector/apple_ng(basic+harvest+social).txt";
+	
+	private static final String VECTOR_APPLE_NU_b = "Test_Vector/apple_nu(basic).txt";
+	private static final String VECTOR_APPLE_NU_bs = "Test_Vector/apple_nu(basic+social).txt";
+	private static final String VECTOR_APPLE_NU_bh = "Test_Vector/apple_nu(basic+harvest).txt";
+	private static final String VECTOR_APPLE_NU_bhs = "Test_Vector/apple_nu(basic+harvest+social).txt";
+	
+	private static final String VECTOR_GOOGLE_P_b = "Test_Vector/google_p(basic).txt";
+	private static final String VECTOR_GOOGLE_P_bs = "Test_Vector/google_p(basic+social).txt";
+	private static final String VECTOR_GOOGLE_P_bh = "Test_Vector/google_p(basic+harvest).txt";
+	private static final String VECTOR_GOOGLE_P_bhs = "Test_Vector/google_p(basic+harvest+social).txt";
+	
+	private static final String VECTOR_GOOGLE_NG_b = "Test_Vector/google_ng(basic).txt";
+	private static final String VECTOR_GOOGLE_NG_bs = "Test_Vector/google_ng(basic+social).txt";
+	private static final String VECTOR_GOOGLE_NG_bh = "Test_Vector/google_ng(basic+harvest).txt";
+	private static final String VECTOR_GOOGLE_NG_bhs = "Test_Vector/google_ng(basic+harvest+social).txt";
+	
+	private static final String VECTOR_GOOGLE_NU_b = "Test_Vector/google_nu(basic).txt";
+	private static final String VECTOR_GOOGLE_NU_bs = "Test_Vector/google_nu(basic+social).txt";
+	private static final String VECTOR_GOOGLE_NU_bh = "Test_Vector/google_nu(basic+harvest).txt";
+	private static final String VECTOR_GOOGLE_NU_bhs = "Test_Vector/google_nu(basic+harvest+social).txt";
+	
+	private static final String VECTOR_MICROSOFT_P_b = "Test_Vector/microsoft_p(basic).txt";
+	private static final String VECTOR_MICROSOFT_P_bs = "Test_Vector/microsoft_p(basic+social).txt";
+	private static final String VECTOR_MICROSOFT_P_bh = "Test_Vector/microsoft_p(basic+harvest).txt";
+	private static final String VECTOR_MICROSOFT_P_bhs = "Test_Vector/microsoft_p(basic+harvest+social).txt";
+	
+	private static final String VECTOR_MICROSOFT_NG_b = "Test_Vector/microsoft_ng(basic).txt";
+	private static final String VECTOR_MICROSOFT_NG_bs = "Test_Vector/microsoft_ng(basic+social).txt";
+	private static final String VECTOR_MICROSOFT_NG_bh = "Test_Vector/microsoft_ng(basic+harvest).txt";
+	private static final String VECTOR_MICROSOFT_NG_bhs = "Test_Vector/microsoft_ng(basic+harvest+social).txt";
+	
+	private static final String VECTOR_MICROSOFT_NU_b = "Test_Vector/microsoft_nu(basic).txt";
+	private static final String VECTOR_MICROSOFT_NU_bs = "Test_Vector/microsoft_nu(basic+social).txt";
+	private static final String VECTOR_MICROSOFT_NU_bh = "Test_Vector/microsoft_nu(basic+harvest).txt";
+	private static final String VECTOR_MICROSOFT_NU_bhs = "Test_Vector/microsoft_nu(basic+harvest+social).txt";
+	
+	private static final String VECTOR_TWITTER_P_b = "Test_Vector/twitter_p(basic).txt";
+	private static final String VECTOR_TWITTER_P_bs = "Test_Vector/twitter_p(basic+social).txt";
+	private static final String VECTOR_TWITTER_P_bh = "Test_Vector/twitter_p(basic+harvest).txt";
+	private static final String VECTOR_TWITTER_P_bhs = "Test_Vector/twitter_p(basic+harvest+social).txt";
+	
+	private static final String VECTOR_TWITTER_NG_b = "Test_Vector/twitter_ng(basic).txt";
+	private static final String VECTOR_TWITTER_NG_bs = "Test_Vector/twitter_ng(basic+social).txt";
+	private static final String VECTOR_TWITTER_NG_bh = "Test_Vector/twitter_ng(basic+harvest).txt";
+	private static final String VECTOR_TWITTER_NG_bhs = "Test_Vector/twitter_ng(basic+harvest+social).txt";
+	
+	private static final String VECTOR_TWITTER_NU_b = "Test_Vector/twitter_nu(basic).txt";
+	private static final String VECTOR_TWITTER_NU_bs = "Test_Vector/twitter_nu(basic+social).txt";
+	private static final String VECTOR_TWITTER_NU_bh = "Test_Vector/twitter_nu(basic+harvest).txt";
+	private static final String VECTOR_TWITTER_NU_bhs = "Test_Vector/twitter_nu(basic+harvest+social).txt";
+	
+	// MODELS 
+	private static final String MODEL_APPLE_P_b = "model/apple_p(basic).txt.model";
+	private static final String MODEL_APPLE_P_bs = "model/apple_p(basic+social).txt.model";
+	private static final String MODEL_APPLE_P_bh = "model/apple_p(basic+harvest).txt.model";
+	private static final String MODEL_APPLE_P_bhs = "model/apple_p(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_APPLE_NG_b = "model/apple_ng(basic).txt.model";
+	private static final String MODEL_APPLE_NG_bs = "model/apple_ng(basic+social).txt.model";
+	private static final String MODEL_APPLE_NG_bh = "model/apple_ng(basic+harvest).txt.model";
+	private static final String MODEL_APPLE_NG_bhs = "model/apple_ng(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_APPLE_NU_b = "model/apple_nu(basic).txt.model";
+	private static final String MODEL_APPLE_NU_bs = "model/apple_nu(basic+social).txt.model";
+	private static final String MODEL_APPLE_NU_bh = "model/apple_nu(basic+harvest).txt.model";
+	private static final String MODEL_APPLE_NU_bhs = "model/apple_nu(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_GOOGLE_P_b = "model/google_p(basic).txt.model";
+	private static final String MODEL_GOOGLE_P_bs = "model/google_p(basic+social).txt.model";
+	private static final String MODEL_GOOGLE_P_bh = "model/google_p(basic+harvest).txt.model";
+	private static final String MODEL_GOOGLE_P_bhs = "model/google_p(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_GOOGLE_NG_b = "model/google_ng(basic).txt.model";
+	private static final String MODEL_GOOGLE_NG_bs = "model/google_ng(basic+social).txt.model";
+	private static final String MODEL_GOOGLE_NG_bh = "model/google_ng(basic+harvest).txt.model";
+	private static final String MODEL_GOOGLE_NG_bhs = "model/google_ng(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_GOOGLE_NU_b = "model/google_nu(basic).txt.model";
+	private static final String MODEL_GOOGLE_NU_bs = "model/google_nu(basic+social).txt.model";
+	private static final String MODEL_GOOGLE_NU_bh = "model/google_nu(basic+harvest).txt.model";
+	private static final String MODEL_GOOGLE_NU_bhs = "model/google_nu(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_MICROSOFT_P_b = "model/microsoft_p(basic).txt.model";
+	private static final String MODEL_MICROSOFT_P_bs = "model/microsoft_p(basic+social).txt.model";
+	private static final String MODEL_MICROSOFT_P_bh = "model/microsoft_p(basic+harvest).txt.model";
+	private static final String MODEL_MICROSOFT_P_bhs = "model/microsoft_p(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_MICROSOFT_NG_b = "model/microsoft_ng(basic).txt.model";
+	private static final String MODEL_MICROSOFT_NG_bs = "model/microsoft_ng(basic+social).txt.model";
+	private static final String MODEL_MICROSOFT_NG_bh = "model/microsoft_ng(basic+harvest).txt.model";
+	private static final String MODEL_MICROSOFT_NG_bhs = "model/microsoft_ng(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_MICROSOFT_NU_b = "model/microsoft_nu(basic).txt.model";
+	private static final String MODEL_MICROSOFT_NU_bs = "model/microsoft_nu(basic+social).txt.model";
+	private static final String MODEL_MICROSOFT_NU_bh = "model/microsoft_nu(basic+harvest).txt.model";
+	private static final String MODEL_MICROSOFT_NU_bhs = "model/microsoft_nu(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_TWITTER_P_b = "model/twitter_p(basic).txt.model";
+	private static final String MODEL_TWITTER_P_bs = "model/twitter_p(basic+social).txt.model";
+	private static final String MODEL_TWITTER_P_bh = "model/twitter_p(basic+harvest).txt.model";
+	private static final String MODEL_TWITTER_P_bhs = "model/twitter_p(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_TWITTER_NG_b = "model/twitter_ng(basic).txt.model";
+	private static final String MODEL_TWITTER_NG_bs = "model/twitter_ng(basic+social).txt.model";
+	private static final String MODEL_TWITTER_NG_bh = "model/twitter_ng(basic+harvest).txt.model";
+	private static final String MODEL_TWITTER_NG_bhs = "model/twitter_ng(basic+harvest+social).txt.model";
+	
+	private static final String MODEL_TWITTER_NU_b = "model/twitter_nu(basic).txt.model";
+	private static final String MODEL_TWITTER_NU_bs = "model/twitter_nu(basic+social).txt.model";
+	private static final String MODEL_TWITTER_NU_bh = "model/twitter_nu(basic+harvest).txt.model";
+	private static final String MODEL_TWITTER_NU_bhs = "model/twitter_nu(basic+harvest+social).txt.model";
+	
+	//TESTING VECTORS
+	
+	
+	
 	private static final String VECTOR_GOOGLE	 = "Test_Vector/test/testvector(text)google.txt";
 	private static final String VECTOR_MICROSOFT = "Test_Vector/test/testvector(text)microsoft.txt";
 	private static final String VECTOR_TWITTER = "Test_Vector/test/testvector(text)twitter.txt";
@@ -54,7 +180,7 @@ public class Controller {
 	private static final String TEST_RESULT_TWITTER = "GENERATED-RESULT/Result_twitter.txt";
 	
 	private static final String GROUNDTRUTH_DBS1 = "TEST/Groundtruth_DBS1.txt";
-	private static final String GROUNDTRUTH_DBS2	 = "TEST/Groundtruth_DBS2.txt";
+	private static final String GROUNDTRUTH_DBS2 = "TEST/Groundtruth_DBS2.txt";
 	private static final String GROUNDTRUTH_NUS1 = "TEST/Groundtruth_NUS1.txt";
 	private static final String GROUNDTRUTH_NUS2 = "TEST/Groundtruth_NUS2.txt";
 	private static final String GROUNDTRUTH_STARHUB = "TEST/Groundtruth_STARHUB.txt";
@@ -92,22 +218,76 @@ public class Controller {
 	}
 	
 	public static void generateTestResult(){
-		//FIXME: to check with michael if the classifier will generate a completed SVM file
-		try {
-//			Classifier.generateTestResult(CLASSIFIER_DBS1, VECTOR_DBS1, TEST_RESULT_DBS1);
-//			Classifier.generateTestResult(CLASSIFIER_DBS2, VECTOR_DBS2, TEST_RESULT_DBS2);
-//			Classifier.generateTestResult(CLASSIFIER_NUS1, VECTOR_NUS1, TEST_RESULT_NUS1);
-//			Classifier.generateTestResult(CLASSIFIER_NUS2, VECTOR_NUS2, TEST_RESULT_NUS2);
-//			Classifier.generateTestResult(CLASSIFIER_STARHUB, VECTOR_STARHUB, TEST_RESULT_STARHUB);
-			
-			Classifier.generateTestResult(CLASSIFIER_APPLE, VECTOR_APPLE, TEST_RESULT_APPLE);
-			Classifier.generateTestResult(CLASSIFIER_GOOGLE, VECTOR_GOOGLE, TEST_RESULT_GOOGLE);
-			Classifier.generateTestResult(CLASSIFIER_MICROSOFT, VECTOR_MICROSOFT, TEST_RESULT_MICROSOFT);
-			Classifier.generateTestResult(CLASSIFIER_TWITTER, VECTOR_TWITTER, TEST_RESULT_TWITTER);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
+	}
+	
+	public static void generateModel(){
+//		new ModelGenerator(VECTOR_APPLE_P_b).start();
+//		new ModelGenerator(VECTOR_APPLE_P_bs).start();
+//		new ModelGenerator(VECTOR_APPLE_P_bh).start();
+//		new ModelGenerator(VECTOR_APPLE_P_bhs).start();
+//		
+//		new ModelGenerator(VECTOR_APPLE_NG_b).start();
+//		new ModelGenerator(VECTOR_APPLE_NG_bs).start();
+//		new ModelGenerator(VECTOR_APPLE_NG_bh).start();
+//		new ModelGenerator(VECTOR_APPLE_NG_bhs).start();
+		
+//		new ModelGenerator(VECTOR_APPLE_NU_b).start();
+//		new ModelGenerator(VECTOR_APPLE_NU_bs).start();
+//		new ModelGenerator(VECTOR_APPLE_NU_bh).start();
+		new ModelGenerator(VECTOR_APPLE_NU_bhs).run();
+		
+		new ModelGenerator(VECTOR_GOOGLE_P_b).run();
+		new ModelGenerator(VECTOR_GOOGLE_P_bs).run();
+		new ModelGenerator(VECTOR_GOOGLE_P_bh).run();
+		new ModelGenerator(VECTOR_GOOGLE_P_bhs).run();
+		
+		new ModelGenerator(VECTOR_GOOGLE_NG_b).run();
+		new ModelGenerator(VECTOR_GOOGLE_NG_bs).run();
+		new ModelGenerator(VECTOR_GOOGLE_NG_bh).run();
+		new ModelGenerator(VECTOR_GOOGLE_NG_bhs).run();
+		
+		new ModelGenerator(VECTOR_GOOGLE_NU_b).run();
+		new ModelGenerator(VECTOR_GOOGLE_NU_bs).run();
+		new ModelGenerator(VECTOR_GOOGLE_NU_bh).run();
+		new ModelGenerator(VECTOR_GOOGLE_NU_bhs).run();
+		
+		new ModelGenerator(VECTOR_MICROSOFT_P_b).run();
+		new ModelGenerator(VECTOR_MICROSOFT_P_bs).run();
+		new ModelGenerator(VECTOR_MICROSOFT_P_bh).run();
+		new ModelGenerator(VECTOR_MICROSOFT_P_bhs).run();
+		
+		new ModelGenerator(VECTOR_MICROSOFT_NG_b).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NG_bs).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NG_bh).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NG_bhs).run();
+		
+		new ModelGenerator(VECTOR_MICROSOFT_NU_b).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NU_bs).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NU_bh).run();
+		new ModelGenerator(VECTOR_MICROSOFT_NU_bhs).run();
+		
+		new ModelGenerator(VECTOR_TWITTER_P_b).run();
+		new ModelGenerator(VECTOR_TWITTER_P_bs).run();
+		new ModelGenerator(VECTOR_TWITTER_P_bh).run();
+		new ModelGenerator(VECTOR_TWITTER_P_bhs).run();
+		
+		new ModelGenerator(VECTOR_TWITTER_NG_b).run();
+		new ModelGenerator(VECTOR_TWITTER_NG_bs).run();
+		new ModelGenerator(VECTOR_TWITTER_NG_bh).run();
+		new ModelGenerator(VECTOR_TWITTER_NG_bhs).run();
+		
+		new ModelGenerator(VECTOR_TWITTER_NU_b).run();
+		new ModelGenerator(VECTOR_TWITTER_NU_bs).run();
+		new ModelGenerator(VECTOR_TWITTER_NU_bh).run();
+		new ModelGenerator(VECTOR_TWITTER_NU_bhs).run();
+		
+		
+
+//			Classifier.generateTestResult(CLASSIFIER_APPLE, VECTOR_APPLE, TEST_RESULT_APPLE);
+//			Classifier.generateTestResult(CLASSIFIER_GOOGLE, VECTOR_GOOGLE, TEST_RESULT_GOOGLE);
+//			Classifier.generateTestResult(CLASSIFIER_MICROSOFT, VECTOR_MICROSOFT, TEST_RESULT_MICROSOFT);
+//			Classifier.generateTestResult(CLASSIFIER_TWITTER, VECTOR_TWITTER, TEST_RESULT_TWITTER);
 	}
 	
 	private double[] calculateResult(String generatedResultFile, String groundTruthFile){
@@ -217,7 +397,7 @@ public class Controller {
 //		css.run();
 		
 		//generate feature for emotion
-		generateTrainingFeature();
+//		generateTrainingFeature();
 //		generateHarvestFeature();
 					
 		//combine feature
@@ -236,62 +416,79 @@ public class Controller {
 //		classifySentimentDifferentClass();
 		//depending on classification, use a different modal
 				
+		
+		generateModel();
 //		generateTestResult();
 		
 	}
 
 	private static void generateCombinedFeature() {
 		//basic + social
-		combineVector("Test_Vector/apple_p(basic+social).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(social).txt");
-		combineVector("Test_Vector/apple_p(basic+social).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(social).txt");
-		combineVector("Test_Vector/apple_p(basic+social).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(social).txt");
+		Vector<Thread> vt = new Vector<Thread>();
+		vt.add(new CombineVector("Test_Vector/apple_p(basic+social).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(social).txt"));
+		vt.add(new CombineVector("Test_Vector/apple_ng(basic+social).txt","Test_Vector/apple_ng(basic).txt", "Test_Vector/social/apple_ng(social).txt"));
+		vt.add(new CombineVector("Test_Vector/apple_nu(basic+social).txt","Test_Vector/apple_nu(basic).txt", "Test_Vector/social/apple_nu(social).txt"));
 
-		combineVector("Test_Vector/google_p(basic+social).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(social).txt");
-		combineVector("Test_Vector/google_p(basic+social).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(social).txt");
-		combineVector("Test_Vector/google_p(basic+social).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(social).txt");
+		vt.add(new CombineVector("Test_Vector/google_p(basic+social).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(social).txt"));
+		vt.add(new CombineVector("Test_Vector/google_ng(basic+social).txt","Test_Vector/google_ng(basic).txt", "Test_Vector/social/google_ng(social).txt"));
+		vt.add(new CombineVector("Test_Vector/google_nu(basic+social).txt","Test_Vector/google_nu(basic).txt", "Test_Vector/social/google_nu(social).txt"));
 
-		combineVector("Test_Vector/microsoft_p(basic+social).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(social).txt");
-		combineVector("Test_Vector/microsoft_p(basic+social).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(social).txt");
-		combineVector("Test_Vector/microsoft_p(basic+social).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(social).txt");
+		vt.add(new CombineVector("Test_Vector/microsoft_p(basic+social).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(social).txt"));
+		vt.add(new CombineVector("Test_Vector/microsoft_ng(basic+social).txt","Test_Vector/microsoft_ng(basic).txt", "Test_Vector/social/microsoft_ng(social).txt"));
+		vt.add(new CombineVector("Test_Vector/microsoft_nu(basic+social).txt","Test_Vector/microsoft_nu(basic).txt", "Test_Vector/social/microsoft_nu(social).txt"));
 
-		combineVector("Test_Vector/twitter_p(basic+social).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(social).txt");
-		combineVector("Test_Vector/twitter_p(basic+social).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(social).txt");
-		combineVector("Test_Vector/twitter_p(basic+social).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(social).txt");
+		vt.add(new CombineVector("Test_Vector/twitter_p(basic+social).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(social).txt"));
+		vt.add(new CombineVector("Test_Vector/twitter_ng(basic+social).txt","Test_Vector/twitter_ng(basic).txt", "Test_Vector/social/twitter_ng(social).txt"));
+		vt.add(new CombineVector("Test_Vector/twitter_nu(basic+social).txt","Test_Vector/twitter_nu(basic).txt", "Test_Vector/social/twitter_nu(social).txt"));
 
-		//basic + harvest
-		combineVector("Test_Vector/apple_p(basic+harvest).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(harvest).txt");
-		combineVector("Test_Vector/apple_p(basic+harvest).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(harvest).txt");
-		combineVector("Test_Vector/apple_p(basic+harvest).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/social/apple_p(harvest).txt");
+//		//basic + harvest
+//		vt.add(new CombineVector("Test_Vector/apple_p(basic+harvest).txt","Test_Vector/apple_p(basic).txt", "Test_Vector/harvest/apple_p(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/apple_ng(basic+harvest).txt","Test_Vector/apple_ng(basic).txt", "Test_Vector/harvest/apple_ng(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/apple_nu(basic+harvest).txt","Test_Vector/apple_nu(basic).txt", "Test_Vector/harvest/apple_nu(harvest).txt"));
+//
+//		vt.add(new CombineVector("Test_Vector/google_p(basic+harvest).txt","Test_Vector/google_p(basic).txt", "Test_Vector/harvest/google_p(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/google_ng(basic+harvest).txt","Test_Vector/google_ng(basic).txt", "Test_Vector/harvest/google_ng(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/google_nu(basic+harvest).txt","Test_Vector/google_nu(basic).txt", "Test_Vector/harvest/google_nu(harvest).txt"));
+//
+//		vt.add(new CombineVector("Test_Vector/microsoft_p(basic+harvest).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/harvest/microsoft_p(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/microsoft_ng(basic+harvest).txt","Test_Vector/microsoft_ng(basic).txt", "Test_Vector/harvest/microsoft_ng(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/microsoft_nu(basic+harvest).txt","Test_Vector/microsoft_nu(basic).txt", "Test_Vector/harvest/microsoft_nu(harvest).txt"));
+//
+//		vt.add(new CombineVector("Test_Vector/twitter_p(basic+harvest).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/harvest/twitter_p(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/twitter_ng(basic+harvest).txt","Test_Vector/twitter_ng(basic).txt", "Test_Vector/harvest/twitter_ng(harvest).txt"));
+//		vt.add(new CombineVector("Test_Vector/twitter_nu(basic+harvest).txt","Test_Vector/twitter_nu(basic).txt", "Test_Vector/harvest/twitter_nu(harvest).txt"));
+//		
+		for (Thread t : vt){
+			System.out.println("combine");
+			t.start();
+		}
 
-		combineVector("Test_Vector/google_p(basic+harvest).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(harvest).txt");
-		combineVector("Test_Vector/google_p(basic+harvest).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(harvest).txt");
-		combineVector("Test_Vector/google_p(basic+harvest).txt","Test_Vector/google_p(basic).txt", "Test_Vector/social/google_p(harvest).txt");
-
-		combineVector("Test_Vector/microsoft_p(basic+harvest).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(harvest).txt");
-		combineVector("Test_Vector/microsoft_p(basic+harvest).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(harvest).txt");
-		combineVector("Test_Vector/microsoft_p(basic+harvest).txt","Test_Vector/microsoft_p(basic).txt", "Test_Vector/social/microsoft_p(harvest).txt");
-
-		combineVector("Test_Vector/twitter_p(basic+harvest).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(harvest).txt");
-		combineVector("Test_Vector/twitter_p(basic+harvest).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(harvest).txt");
-		combineVector("Test_Vector/twitter_p(basic+harvest).txt","Test_Vector/twitter_p(basic).txt", "Test_Vector/social/twitter_p(harvest).txt");
-		
+		try {
+			for (Thread t : vt){
+				t.join();
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//basic + harvest + social
-		combineVector("Test_Vector/apple_p(basic+harvest+social).txt","Test_Vector/apple_p(basic+harvest).txt", "Test_Vector/social/apple_p(social).txt");
-		combineVector("Test_Vector/apple_p(basic+harvest+social).txt","Test_Vector/apple_p(basic+harvest).txt", "Test_Vector/social/apple_p(social).txt");
-		combineVector("Test_Vector/apple_p(basic+harvest+social).txt","Test_Vector/apple_p(basic+harvest).txt", "Test_Vector/social/apple_p(social).txt");
+		System.out.println("combining: basic + harvest + social");
+		new CombineVector("Test_Vector/apple_p(basic+harvest+social).txt","Test_Vector/apple_p(basic+harvest).txt", "Test_Vector/social/apple_p(social).txt").start();
+		new CombineVector("Test_Vector/apple_ng(basic+harvest+social).txt","Test_Vector/apple_ng(basic+harvest).txt", "Test_Vector/social/apple_ng(social).txt").start();
+		new CombineVector("Test_Vector/apple_nu(basic+harvest+social).txt","Test_Vector/apple_nu(basic+harvest).txt", "Test_Vector/social/apple_nu(social).txt").start();
 
-		combineVector("Test_Vector/google_p(basic+harvest+social).txt","Test_Vector/google_p(basic+harvest).txt", "Test_Vector/social/google_p(social).txt");
-		combineVector("Test_Vector/google_p(basic+harvest+social).txt","Test_Vector/google_p(basic+harvest).txt", "Test_Vector/social/google_p(social).txt");
-		combineVector("Test_Vector/google_p(basic+harvest+social).txt","Test_Vector/google_p(basic+harvest).txt", "Test_Vector/social/google_p(social).txt");
+		new CombineVector("Test_Vector/google_p(basic+harvest+social).txt","Test_Vector/google_p(basic+harvest).txt", "Test_Vector/social/google_p(social).txt").start();
+		new CombineVector("Test_Vector/google_ng(basic+harvest+social).txt","Test_Vector/google_ng(basic+harvest).txt", "Test_Vector/social/google_ng(social).txt").start();
+		new CombineVector("Test_Vector/google_nu(basic+harvest+social).txt","Test_Vector/google_nu(basic+harvest).txt", "Test_Vector/social/google_nu(social).txt").start();
 
-		combineVector("Test_Vector/microsoft_p(basic+harvest+social).txt","Test_Vector/microsoft_p(basic+harvest).txt", "Test_Vector/social/microsoft_p(social).txt");
-		combineVector("Test_Vector/microsoft_p(basic+harvest+social).txt","Test_Vector/microsoft_p(basic+harvest).txt", "Test_Vector/social/microsoft_p(social).txt");
-		combineVector("Test_Vector/microsoft_p(basic+harvest+social).txt","Test_Vector/microsoft_p(basic+harvest).txt", "Test_Vector/social/microsoft_p(social).txt");
+		new CombineVector("Test_Vector/microsoft_p(basic+harvest+social).txt","Test_Vector/microsoft_p(basic+harvest).txt", "Test_Vector/social/microsoft_p(social).txt").start();
+		new CombineVector("Test_Vector/microsoft_ng(basic+harvest+social).txt","Test_Vector/microsoft_ng(basic+harvest).txt", "Test_Vector/social/microsoft_ng(social).txt").start();
+		new CombineVector("Test_Vector/microsoft_nu(basic+harvest+social).txt","Test_Vector/microsoft_nu(basic+harvest).txt", "Test_Vector/social/microsoft_nu(social).txt").start();
 
-		combineVector("Test_Vector/twitter_p(basic+harvest+social).txt","Test_Vector/twitter_p(basic+harvest).txt", "Test_Vector/social/twitter_p(social).txt");
-		combineVector("Test_Vector/twitter_p(basic+harvest+social).txt","Test_Vector/twitter_p(basic+harvest).txt", "Test_Vector/social/twitter_p(social).txt");
-		combineVector("Test_Vector/twitter_p(basic+harvest+social).txt","Test_Vector/twitter_p(basic+harvest).txt", "Test_Vector/social/twitter_p(social).txt");
-				
+		new CombineVector("Test_Vector/twitter_p(basic+harvest+social).txt","Test_Vector/twitter_p(basic+harvest).txt", "Test_Vector/social/twitter_p(social).txt").start();
+		new CombineVector("Test_Vector/twitter_ng(basic+harvest+social).txt","Test_Vector/twitter_ng(basic+harvest).txt", "Test_Vector/social/twitter_ng(social).txt").start();
+		new CombineVector("Test_Vector/twitter_nu(basic+harvest+social).txt","Test_Vector/twitter_nu(basic+harvest).txt", "Test_Vector/social/twitter_nu(social).txt").start();
+
 	}
 
 	private static void generateHarvestFeature() {
@@ -300,34 +497,46 @@ public class Controller {
 		Tweets a_pTweet = new Tweets("Train/pos_apple.txt");
 		Tweets a_ngTweet = new Tweets("Train/neg_apple.txt");
 		Tweets a_nuTweet = new Tweets("Train/neu_apple.txt");
-		HarvestFeatureGenerator a_p_hfg = new HarvestFeatureGenerator(a_pTweet.getTweets(), a_ngTweet.getTweets(), a_nuTweet.getTweets(), "Test_Vector/harvest/apple_p(harvest).txt");
-		HarvestFeatureGenerator a_ng_hfg = new HarvestFeatureGenerator(a_ngTweet.getTweets(), a_pTweet.getTweets(), a_nuTweet.getTweets(), "Test_Vector/harvest/apple_ng(harvest).txt");
-		HarvestFeatureGenerator a_nu_hfg = new HarvestFeatureGenerator(a_nuTweet.getTweets(), a_pTweet.getTweets(), a_ngTweet.getTweets(),"Test_Vector/harvest/apple_nu(harvest).txt");
+		HarvestFeatureGenerator a_p_hfg = new HarvestFeatureGenerator(a_pTweet.getTweets(), a_ngTweet.getTweets(), a_nuTweet.getTweets(), "Test_Vector/harvest/apple_p(harvest).txt", "Dictionary/apple_p.txt");
+		HarvestFeatureGenerator a_ng_hfg = new HarvestFeatureGenerator(a_ngTweet.getTweets(), a_pTweet.getTweets(), a_nuTweet.getTweets(), "Test_Vector/harvest/apple_ng(harvest).txt", "Dictionary/apple_ng.txt");
+		HarvestFeatureGenerator a_nu_hfg = new HarvestFeatureGenerator(a_nuTweet.getTweets(), a_pTweet.getTweets(), a_ngTweet.getTweets(),"Test_Vector/harvest/apple_nu(harvest).txt", "Dictionary/apple_nu.txt");
+		a_p_hfg.start();
+		a_ng_hfg.start();
+		a_nu_hfg.start();
 		
 		System.out.println("google - start");
 		Tweets g_pTweet = new Tweets("Train/pos_google.txt");
 		Tweets g_ngTweet = new Tweets("Train/neg_google.txt");
 		Tweets g_nuTweet = new Tweets("Train/neu_google.txt");
-		HarvestFeatureGenerator g_p_hfg = new HarvestFeatureGenerator(g_pTweet.getTweets(), g_ngTweet.getTweets(), g_nuTweet.getTweets(), "Test_Vector/harvest/google_p(harvest).txt");
-		HarvestFeatureGenerator g_ng_hfg = new HarvestFeatureGenerator(g_ngTweet.getTweets(), g_pTweet.getTweets(), g_nuTweet.getTweets(), "Test_Vector/harvest/google_ng(harvest).txt");
-		HarvestFeatureGenerator g_nu_hfg = new HarvestFeatureGenerator(g_nuTweet.getTweets(), g_pTweet.getTweets(), g_ngTweet.getTweets(),"Test_Vector/harvest/google_nu(harvest).txt");
-
+		HarvestFeatureGenerator g_p_hfg = new HarvestFeatureGenerator(g_pTweet.getTweets(), g_ngTweet.getTweets(), g_nuTweet.getTweets(), "Test_Vector/harvest/google_p(harvest).txt", "Dictionary/google_p.txt");
+		HarvestFeatureGenerator g_ng_hfg = new HarvestFeatureGenerator(g_ngTweet.getTweets(), g_pTweet.getTweets(), g_nuTweet.getTweets(), "Test_Vector/harvest/google_ng(harvest).txt", "Dictionary/google_ng.txt");
+		HarvestFeatureGenerator g_nu_hfg = new HarvestFeatureGenerator(g_nuTweet.getTweets(), g_pTweet.getTweets(), g_ngTweet.getTweets(),"Test_Vector/harvest/google_nu(harvest).txt", "Dictionary/google_nu.txt");
+		g_p_hfg.start();
+		g_ng_hfg.start();
+		g_nu_hfg.start();
+		
 		System.out.println("microsoft - start");
 		Tweets m_pTweet = new Tweets("Train/pos_microsoft.txt");
 		Tweets m_ngTweet = new Tweets("Train/neg_microsoft.txt");
 		Tweets m_nuTweet = new Tweets("Train/neu_microsoft.txt");
-		HarvestFeatureGenerator m_p_hfg = new HarvestFeatureGenerator(m_pTweet.getTweets(), m_ngTweet.getTweets(), m_nuTweet.getTweets(), "Test_Vector/harvest/microsoft(harvest).txt");
-		HarvestFeatureGenerator m_ng_hfg = new HarvestFeatureGenerator(m_ngTweet.getTweets(), m_pTweet.getTweets(), m_nuTweet.getTweets(), "Test_Vector/harvest/microsoft_ng(harvest).txt");
-		HarvestFeatureGenerator m_nu_hfg = new HarvestFeatureGenerator(m_nuTweet.getTweets(), m_pTweet.getTweets(), m_ngTweet.getTweets(),"Test_Vector/harvest/microsoft_nu(harvest).txt");
+		HarvestFeatureGenerator m_p_hfg = new HarvestFeatureGenerator(m_pTweet.getTweets(), m_ngTweet.getTweets(), m_nuTweet.getTweets(), "Test_Vector/harvest/microsoft_p(harvest).txt", "Dictionary/microsoft_p.txt");
+		HarvestFeatureGenerator m_ng_hfg = new HarvestFeatureGenerator(m_ngTweet.getTweets(), m_pTweet.getTweets(), m_nuTweet.getTweets(), "Test_Vector/harvest/microsoft_ng(harvest).txt", "Dictionary/microsoft_ng.txt");
+		HarvestFeatureGenerator m_nu_hfg = new HarvestFeatureGenerator(m_nuTweet.getTweets(), m_pTweet.getTweets(), m_ngTweet.getTweets(),"Test_Vector/harvest/microsoft_nu(harvest).txt", "Dictionary/microsoft_nu.txt");
+		m_p_hfg.start();
+		m_ng_hfg.start();
+		m_nu_hfg.start();
 		
 		System.out.println("twitter - start");
 		Tweets t_pTweet = new Tweets("Train/pos_twitter.txt");
 		Tweets t_ngTweet = new Tweets("Train/neg_twitter.txt");
 		Tweets t_nuTweet = new Tweets("Train/neu_twitter.txt");
-		HarvestFeatureGenerator t_p_hfg = new HarvestFeatureGenerator(t_pTweet.getTweets(), t_ngTweet.getTweets(), t_nuTweet.getTweets(), "Test_Vector/harvest/twitter(harvest).txt");
-		HarvestFeatureGenerator t_ng_hfg = new HarvestFeatureGenerator(t_ngTweet.getTweets(), t_pTweet.getTweets(), t_nuTweet.getTweets(), "Test_Vector/harvest/twitter_ng(harvest).txt");
-		HarvestFeatureGenerator t_nu_hfg = new HarvestFeatureGenerator(t_nuTweet.getTweets(), t_pTweet.getTweets(), t_ngTweet.getTweets(),"Test_Vector/harvest/twitter_nu(harvest).txt");
-
+		HarvestFeatureGenerator t_p_hfg = new HarvestFeatureGenerator(t_pTweet.getTweets(), t_ngTweet.getTweets(), t_nuTweet.getTweets(), "Test_Vector/harvest/twitter_p(harvest).txt", "Dictionary/twitter_p.txt");
+		HarvestFeatureGenerator t_ng_hfg = new HarvestFeatureGenerator(t_ngTweet.getTweets(), t_pTweet.getTweets(), t_nuTweet.getTweets(), "Test_Vector/harvest/twitter_ng(harvest).txt", "Dictionary/twitter_ng.txt");
+		HarvestFeatureGenerator t_nu_hfg = new HarvestFeatureGenerator(t_nuTweet.getTweets(), t_pTweet.getTweets(), t_ngTweet.getTweets(),"Test_Vector/harvest/twitter_nu(harvest).txt", "Dictionary/twitter_nu.txt");
+		t_p_hfg.start();
+		t_ng_hfg.start();
+		t_nu_hfg.start();
+		
 	}
 	
 	private static void classifySentimentDifferentClass() {
@@ -454,4 +663,12 @@ public class Controller {
 		t_ng_bfg.start();
 		t_nu_bfg.start();
 	}
+	
+	private static void generateTestingFeature() {
+		System.out.println("apple - start");
+		Tweets testTweets = new Tweets("Test/tweets_test.txt");
+		Vector<Tweet> empty = new Vector<Tweet>(); 
+		new BasicFeatureGenerator(testTweets.getTweets(), empty, empty, "TESTING_VECTOR/testing(basic).txt").run();
+	}
+	
 }

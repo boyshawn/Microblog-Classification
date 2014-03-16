@@ -8,12 +8,24 @@ import java.util.Vector;
 
 import model.Tweet;
 
-public class HarvestFeatureGenerator {
+public class HarvestFeatureGenerator extends Thread{
 
-	private static final String DICTIONARY = "Dictionary/basic.txt";
+	String DICTIONARY;
+	Vector<Tweet> pos; 
+	Vector<Tweet> neg; 
+	Vector<Tweet> neg2; 
+	String filename;
 	
 	public HarvestFeatureGenerator(Vector<Tweet> pos, Vector<Tweet> neg,
-			Vector<Tweet> neg2, String filename) {
+			Vector<Tweet> neg2, String filename, String dictionary) {
+		this.pos = pos;
+		this.neg = neg;
+		this.neg2 = neg2;
+		this.filename = filename;
+		DICTIONARY = dictionary;
+	}
+	
+	public void run(){
 		Vector<String> dictionary = new Vector<String>();
 
 		try{

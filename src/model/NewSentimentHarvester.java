@@ -13,7 +13,9 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -179,17 +181,73 @@ public class NewSentimentHarvester {
 		final String testDataFile = "TEST/TEST.txt";
 		//System.out.println(new File(".").getAbsolutePath());
 		
-		nsh = new NewSentimentHarvester();
-		nsh.run("data\\tweets_train.txt");
+		Vector<String> basic = getAllBasic();
 		
-		/*
-		 * Print new Lexicon for checking
-		 * nsh.newLexicon ==> is a HashMap<String, Integer>
-		 * 						where String = keyword
-		 * 						where Integer = 0/1/2 for polarity pos/neg/neu respectively
-		 * */
-		for (String key: nsh.newLexicon.keySet()){
-			System.out.println("Key = " + key + " - " + nsh.newLexicon.get(key));
+		nsh = new NewSentimentHarvester();
+		
+		generateHarvestDictionary(basic, "TRAIN\\pos_apple.txt", "Dictionary/apple_p.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neg_apple.txt", "Dictionary/apple_ng.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neu_apple.txt", "Dictionary/apple_nu.txt");
+		
+		generateHarvestDictionary(basic, "TRAIN\\pos_google.txt", "Dictionary/google_p.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neg_google.txt", "Dictionary/google_ng.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neu_google.txt", "Dictionary/google_nu.txt");
+		
+		generateHarvestDictionary(basic, "TRAIN\\pos_microsoft.txt", "Dictionary/microsoft_p.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neg_microsoft.txt", "Dictionary/microsoft_ng.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neu_microsoft.txt", "Dictionary/microsoft_nu.txt");
+		
+		generateHarvestDictionary(basic, "TRAIN\\pos_twitter.txt", "Dictionary/twitter_p.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neg_twitter.txt", "Dictionary/twitter_ng.txt");
+		generateHarvestDictionary(basic, "TRAIN\\neu_twitter.txt", "Dictionary/twitter_nu.txt");
+		
+		
+//		nsh.run("TRAIN\\pos_apple.txt");
+//		
+//		/*
+//		 * Print new Lexicon for checking
+//		 * nsh.newLexicon ==> is a HashMap<String, Integer>
+//		 * 						where String = keyword
+//		 * 						where Integer = 0/1/2 for polarity pos/neg/neu respectively
+//		 * */
+//		for (String key: nsh.newLexicon.keySet()){
+//			System.out.println("Key = " + key + " - " + nsh.newLexicon.get(key));
+//		}
+	}
+
+	private static void generateHarvestDictionary(Vector<String> basic,
+			String input, String output) {
+		try{
+			nsh.run(input);
+			PrintWriter pw = new PrintWriter(new FileWriter(output));
+			
+//			for(int i=0; i<basic.size(); i++){
+//				pw.println(basic.get(i));
+//			}
+			
+			for (String key: nsh.newLexicon.keySet()){
+				pw.println(key);
+				//System.out.println("Key = " + key + " - " + nsh.newLexicon.get(key));
+			}
+			pw.close();
+		}catch(Exception e){
+			
+		}		
+	}
+
+	private static Vector<String> getAllBasic() {
+		Vector<String> dictionary = new Vector<String>();
+		try{
+			// Read dictionary
+			BufferedReader reader = new BufferedReader(new FileReader("Dictionary/basic.txt"));	
+			String line;
+			while((line = reader.readLine()) != null){
+				dictionary.add(line);				
+			}
+			reader.close();
+		}catch(Exception e){
+			e.printStackTrace();
 		}
+		return dictionary;
 	}
 }
