@@ -36,7 +36,7 @@ public class BomohPredictor {
 		List<TaggedToken> taggedTokens;
 		Tagger tagger = new Tagger();
 		tagger.loadModel(modelFilename);
-		
+		 
 		BufferedReader br;
 		String line, word;
 		int pos, neg, neu, pred;
@@ -112,9 +112,9 @@ public class BomohPredictor {
 	public static void main(String[] args) throws IOException, JSONException{
 		BomohPredictor bomoh = new BomohPredictor();
 		bomoh.run("TEST\\tweets_test.txt");
-		for (int i=0; i<bomoh.prediction.size(); i++){
-			System.out.print(bomoh.prediction.get(i) + "    ");
-			System.out.println(bomoh.tweetstore.get(i));
-		}
+//		for (int i=0; i<bomoh.prediction.size(); i++){
+//			System.out.print(bomoh.prediction.get(i) + "    ");
+//			System.out.println(bomoh.tweetstore.get(i));
+//		}
 	}
 }
