@@ -38,8 +38,8 @@ public class BomohPredictor {
 		tagger.loadModel(modelFilename);
 		
 		BufferedReader br;
-		String line;
-		int pos, neg, neu;
+		String line, word;
+		int pos, neg, neu, pred;
 		br = new BufferedReader(new FileReader(testDataFile));
 		while((line = br.readLine()) != null){
 			
@@ -51,9 +51,12 @@ public class BomohPredictor {
 			
 			taggedTokens = tagger.tokenizeAndTag(text);
 			for (TaggedToken t : taggedTokens){	
-				 if (posLex.containsKey(t.token.toUpperCase())) pos++;
-				 if (negLex.containsKey(t.token.toUpperCase())) neg++;
-				 if (neuLex.containsKey(t.token.toUpperCase())) neu++;
+				if (t.tag.equalsIgnoreCase("#")){ t.token = t.token.substring(1); } // remove hashtag at front
+				word = t.token.toUpperCase();
+				
+				 if (posLex.containsKey(word)) pos++;
+				 if (negLex.containsKey(word)) neg++;
+				 if (neuLex.containsKey(word)) neu++;
 			}
 			
 			/*
@@ -63,13 +66,34 @@ public class BomohPredictor {
 			 *	neu = no pos no neg or pos==neg
 			 * */
 			
-			if (pos > neg) prediction.add(0);
-			else if (neg > pos) prediction.add(1);
-			else prediction.add(2);
+			if (pos > neg) pred=0;
+			else if (neg > pos) pred=1;
+			else pred=2;
+			
+			prediction.add(pred);
+			System.out.println(pos + " " + neg + " " + neu + " " + pred + " " + text);
 		}
 		 
 		br.close();
 	}
+	
+	private void coconutDropFromSky(String fn) throws IOException{
+		BufferedReader br;
+		String line;
+		String curr[];
+		ArrayList<ArrayList<String>> gold = new ArrayList<ArrayList<String>>(); 
+
+		br = new BufferedReader(new FileReader(fn));
+		while((line = br.readLine()) != null){
+			curr = line.split(",");
+			
+			gold.add(new ArrayList<String>());
+			
+		}
+		br.close();
+
+	}
+	
 	
 	private HashMap<String, Integer> readLexiconFromGI(String fn, Integer x) throws IOException{
 		BufferedReader br;
