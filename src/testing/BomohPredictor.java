@@ -17,6 +17,7 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 public class BomohPredictor {
 	
 	ArrayList<Integer> prediction = new ArrayList<Integer>();
+	ArrayList<String> tweetstore = new ArrayList<String>();
 
 	private void run(String testDataFile) throws IOException, JSONException{
 		
@@ -45,6 +46,8 @@ public class BomohPredictor {
 			pos = neg = neu = 0;
 			JSONObject tweet = new JSONObject(line);
 			String text = tweet.getString("text");
+			tweetstore.add(text);
+			
 			
 			taggedTokens = tagger.tokenizeAndTag(text);
 			for (TaggedToken t : taggedTokens){	
@@ -86,7 +89,8 @@ public class BomohPredictor {
 		BomohPredictor bomoh = new BomohPredictor();
 		bomoh.run("TEST\\tweets_test.txt");
 		for (int i=0; i<bomoh.prediction.size(); i++){
-			System.out.println(bomoh.prediction.get(i));
+			System.out.print(bomoh.prediction.get(i) + "    ");
+			System.out.println(bomoh.tweetstore.get(i));
 		}
 	}
 }
