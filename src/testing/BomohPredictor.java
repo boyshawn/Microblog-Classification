@@ -48,9 +48,9 @@ public class BomohPredictor {
 			
 			taggedTokens = tagger.tokenizeAndTag(text);
 			for (TaggedToken t : taggedTokens){	
-				 if (posLex.containsKey(t.token)) pos++;
-				 if (negLex.containsKey(t.token)) neg++;
-				 if (neuLex.containsKey(t.token)) neu++;
+				 if (posLex.containsKey(t.token.toUpperCase())) pos++;
+				 if (negLex.containsKey(t.token.toUpperCase())) neg++;
+				 if (neuLex.containsKey(t.token.toUpperCase())) neu++;
 			}
 			
 			/*
