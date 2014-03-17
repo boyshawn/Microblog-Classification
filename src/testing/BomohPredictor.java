@@ -32,7 +32,7 @@ public class BomohPredictor {
 		// 2. read in training tweets
 		
 		String modelFilename = "/cmu/arktweetnlp/model.20120919";
-		List<TaggedToken> taggedTokens, selectedTokens;
+		List<TaggedToken> taggedTokens;
 		Tagger tagger = new Tagger();
 		tagger.loadModel(modelFilename);
 		
@@ -82,7 +82,11 @@ public class BomohPredictor {
 		return Lexicon;
 	}
 	
-	public static void main(String[] args){
-		
+	public static void main(String[] args) throws IOException, JSONException{
+		BomohPredictor bomoh = new BomohPredictor();
+		bomoh.run("TEST\\tweets_test.txt");
+		for (int i=0; i<bomoh.prediction.size(); i++){
+			System.out.println(bomoh.prediction.get(i));
+		}
 	}
 }
