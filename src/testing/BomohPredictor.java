@@ -17,6 +17,7 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 public class BomohPredictor {
 	
 	ArrayList<Integer> prediction = new ArrayList<Integer>();
+	ArrayList<Integer> mprediction = new ArrayList<Integer>();
 	ArrayList<Integer> actual = new ArrayList<Integer>();
 	ArrayList<String> tweetstore = new ArrayList<String>();
 
@@ -46,12 +47,12 @@ public class BomohPredictor {
 		BufferedReader br;
 		String line, word;
 		int pos, neg, neu, pred;
-		int mpos, mneg, mneu;
+		int mpos, mneg, mneu, mpred;
 		br = new BufferedReader(new FileReader(testDataFile));
 		while((line = br.readLine()) != null){
 			
 			pos = neg = neu = 0;
-			mpos = mneg mneu = 0;
+			mpos = mneg = mneu = 0;
 			JSONObject tweet = new JSONObject(line);
 			String text = tweet.getString("text");
 			tweetstore.add(text);
@@ -84,8 +85,14 @@ public class BomohPredictor {
 			if (pos > neg) pred=0;
 			else if (neg > pos) pred=1;
 			else pred=2;
-			
 			prediction.add(pred);
+			
+			if (mpos > mneg) mpred=0;
+			else if (mneg > mpos) mpred=1;
+			else mpred=2;
+			mprediction.add(mpred);
+			
+			
 			//System.out.println(pos + " " + neg + " " + neu + " " + pred + " " + text);
 		}
 		 
@@ -198,20 +205,39 @@ public class BomohPredictor {
 			pre = (double)tp / tp_fp;
 			rec = (double)tp / tp_fn;
 			f1 = (pre+rec != 0) ? 2 * (pre*rec) / (pre+rec) : 0; 
+			
+			// Display results
+			String[] disp = {"positive", "negative", "neutral"};
+			System.out.println("Case: " + disp[x]);
+			System.out.println("Precision = " + pre);
+			System.out.println("Recall = " + rec);
+			System.out.println("F1 = " + f1);
+			System.out.println();
 		}
 		
 	}
+	
+	private void printPrediction() {
+		String[] disp = {"positive", "negative", "neutral"};
+		for (int i=0; i<prediction.size(); ++i){
+			System.out.println("" + i + ": " + disp[prediction.get(i)]);
+		}
+	}
+
 	
 	public static void main(String[] args) throws IOException, JSONException{
 		BomohPredictor bomoh = new BomohPredictor();
 		bomoh.run("TEST\\tweets_test.txt");
 		bomoh.score("TEST\\label_test.txt");
 		
+		//bomoh.printPrediction();
+		
 //		for (int i=0; i<bomoh.prediction.size(); i++){
 //			System.out.print(bomoh.prediction.get(i) + "    ");
 //			System.out.println(bomoh.tweetstore.get(i));
 //		}
 	}
+
 
 
 }
