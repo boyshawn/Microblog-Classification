@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONException;
@@ -23,13 +24,14 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 
 public class BomohPredictor {
 	
-	HashMap<String, HashMap<String,String>> basicLex;
+	HashMap<String, HashMap<String,String>> basicLex, learnLex;
 	Tagger tagger;
 	ArrayList<Integer> prediction, actual;
 	
-	public BomohPredictor(String fn) throws IOException{
+	public BomohPredictor(String fn, String fn1, String fn2) throws IOException, JSONException{
 		HashMap<String, HashMap<String,String>> mpqaLex = readLexiconFromMPQA(fn);
 		basicLex = mpqaLex;
+		learnLex = learn(fn1, fn2);
 		
 		String modelFilename = "/cmu/arktweetnlp/model.20120919";
 		tagger = new Tagger();
@@ -83,15 +85,18 @@ public class BomohPredictor {
 		tw.close();
 		
 //		// 4. Trains SVM and outputs <ofn>.model in same DIR
-		PrintStream original = new PrintStream(System.out);
-		System.setOut(new PrintStream(new File(ofn+".scale")));
-		String argc[] = {"-s", "data\\TRAIN\\range", ofn};
-		br = new BufferedReader(new InputStreamReader(System.in));
-		svm_scale.main(argc);
-		System.setOut(original);
+//		PrintStream original = new PrintStream(System.out);
+//		System.setOut(new PrintStream(new File(ofn+".scale")));
+//		String argc[] = {"-s", "data\\TRAIN\\range", ofn};
+//		br = new BufferedReader(new InputStreamReader(System.in));
+//		svm_scale.main(argc);
+//		System.setOut(original);
 		
-		String argv[] = {"-s", "0", "-t", "0", ofn+".scale"};
-		svm_train.main(argv);
+//		String argv[] = {"-s", "0", "-t", "0", ofn+".scale"};
+		
+		svm_train t = new svm_train();
+		String argv[] = {"-s", "0", "-t", "2", ofn};
+		t.run(argv);
 	}	
 	
 	private String stringify(ArrayList<String> arrayList) { // Flattens into printable form
@@ -112,8 +117,11 @@ public class BomohPredictor {
 	private ArrayList<String> buildvector(String text) { // input = tweet's text
 		List<TaggedToken> taggedTokens = tagger.tokenizeAndTag(text);
 		int pos, neg, neu;
+		int lpos, lneg, lneu;
 		pos = neg = neu = 0;
+		lpos = lneg = lneu = 0;
 		String word;
+		HashMap<String,String> entry;
 		
 		for (TaggedToken t : taggedTokens){
 			word = t.token.toLowerCase();
@@ -123,7 +131,21 @@ public class BomohPredictor {
 				 if (polarity.equalsIgnoreCase("negative")) neg++;
 				 if (polarity.equalsIgnoreCase("neutral")) neu++;
 			 }
+			
+			if (learnLex.containsKey(word)){
+				entry = learnLex.get(word);
+				if (!entry.containsKey("ambiguous")){
+					String polarity = entry.get("priorpolarity");
+					if (polarity.equalsIgnoreCase("positive")) lpos++;
+					if (polarity.equalsIgnoreCase("negative")) lneg++;
+					if (polarity.equalsIgnoreCase("neutral")) lneu++;
+				}
+			}
 		}
+		
+		// Hack
+		if (pos > 0 || neg > 0 ) neu = 0;
+		if (lpos > 0 || lneg > 0 ) lneu = 0;
 		
 		// build vector
 		/*
@@ -133,6 +155,10 @@ public class BomohPredictor {
 		result.add(Integer.toString(pos));
 		result.add(Integer.toString(neg));
 		result.add(Integer.toString(neu));
+		
+		result.add(Integer.toString(lpos));
+		result.add(Integer.toString(lneg));
+		result.add(Integer.toString(lneu));
 		
 		return result;
 	}
@@ -160,17 +186,18 @@ public class BomohPredictor {
 		
 		// 3. Classify & read results back into Bomoh
 		//Classifier.generateTestResult(fnmodel, ofn, fnres);
-		System.out.println(ofn);
+//		System.out.println(ofn);
 //		PrintStream original = new PrintStream(System.out);
 //		System.setOut(new PrintStream(new File(ofn+".scale")));
-		String argz[] = {"-r", "data\\TRAIN\\range", ofn};
+//		String argz[] = {"-r", "data\\TRAIN\\range", ofn};
 //		br = new BufferedReader(new InputStreamReader(System.in));
-		svm_scale.main(argz);
+//		svm_scale.main(argz);
 //		System.setOut(original);
 		
-		svm_predict t = new svm_predict();
-		String args[] = {ofn+".scale", fnmodel, fnres}; 
-		t.main(args);
+//		svm_predict t = new svm_predict();
+//		String args[] = {ofn+".scale", fnmodel, fnres};
+		String args[] = {ofn, fnmodel, fnres}; 
+		svm_predict.main(args);
 		Double x;
 		br = new BufferedReader(new FileReader(fnres));
 		while((line = br.readLine()) != null){
@@ -264,11 +291,10 @@ public class BomohPredictor {
 			taggedTokens = tagger.tokenizeAndTag(text);
 			for (TaggedToken t : taggedTokens){
 				if (t.tag.equalsIgnoreCase("#")){ 
-					t.token = t.token.substring(1); // remove hashtag at front
+					//t.token = t.token.substring(1); // remove hashtag at front
 					newHashtags.add(t.token.toLowerCase());
 				}
 				if (t.tag.equalsIgnoreCase("A")){
-					
 					newHashtags.add(t.token.toLowerCase());
 				}
 				if (t.tag.equalsIgnoreCase("N")){
@@ -305,9 +331,20 @@ public class BomohPredictor {
 				entry.put("word1", newTokens.get(j));
 				entry.put("pos1", "hashtag");
 				entry.put("priorpolarity", polarity);
-				
+				if (hm.containsKey(newTokens.get(j))){ // set this term as ambiguous if it already exists
+					entry.put("ambiguous", "true");
+				}
 				hm.put(newTokens.get(j), entry);
 			}
+		}
+		
+		ArrayList<String> remv = new ArrayList<String>();
+		for (String key : hm.keySet()){
+			if (hm.get(key).containsKey("ambiguous"))
+				remv.add(key);
+		}
+		for (String key: remv){
+			hm.remove(key);
 		}
 		
 		return hm;
@@ -387,13 +424,15 @@ public class BomohPredictor {
 		
 		String outFileName = "data\\TRAIN\\train_vector";
 		
-		BomohPredictor bomoh = new BomohPredictor(mpqa);
+		BomohPredictor bomoh = new BomohPredictor(mpqa, tweets_train, label_train);
 		bomoh.train(tweets_train, label_train, outFileName);
 		
-		bomoh.run(outFileName + ".scale.model", tweets_test, "data\\TEST\\result");
+		bomoh.run(outFileName + ".model", tweets_test, "data\\TEST\\result");
 		bomoh.score(label_test, bomoh.prediction);
 		
 		//bomoh.printPrediction();
+		//System.out.println("#TEXT".toLowerCase());
+		System.out.println(bomoh.learnLex.size());
 		
 	}
 
