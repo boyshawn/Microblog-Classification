@@ -33,8 +33,13 @@ public class BomohPredictor {
 		// 1.1 Get MPQA
 		HashMap<String, HashMap<String,String>> mpqaLex = readLexiconFromMPQA("data\\subjclueslen1-HLTEMNLP05.tff");
 		
+		// 1.2 Learn from training data
+		HashMap<String, HashMap<String,String>> learnLex = learn("TRAIN\\tweets_train.txt", "TRAIN\\label_train.txt");
+
+		learnLex.putAll(mpqaLex);
+		mpqaLex = learnLex;
 		
-		//System.out.println(mpqaLex.get("abase").get("type"));
+		//System.out.println(mpqaLex.get("abase").get("priorpolarity"));
 		
 		/////////////////////////////
 		// 2. read in training tweets
@@ -45,7 +50,7 @@ public class BomohPredictor {
 		tagger.loadModel(modelFilename);
 		 
 		BufferedReader br;
-		String line, word;
+		String line, word, mword;
 		int pos, neg, neu, pred;
 		int mpos, mneg, mneu, mpred;
 		br = new BufferedReader(new FileReader(testDataFile));
@@ -62,13 +67,14 @@ public class BomohPredictor {
 			for (TaggedToken t : taggedTokens){	
 				if (t.tag.equalsIgnoreCase("#")){ t.token = t.token.substring(1); } // remove hashtag at front
 				word = t.token.toUpperCase();
+				mword = t.token.toLowerCase();
 				
 				 if (posLex.containsKey(word)) pos++;
 				 if (negLex.containsKey(word)) neg++;
 				 if (neuLex.containsKey(word)) neu++;
 				 
-				 if (mpqaLex.containsKey(word)){
-					 String polarity = mpqaLex.get(word).get("priorpolarity");
+				 if (mpqaLex.containsKey(mword)){
+					 String polarity = mpqaLex.get(mword).get("priorpolarity");
 					 if (polarity.equalsIgnoreCase("positive")) mpos++;
 					 if (polarity.equalsIgnoreCase("negative")) mneg++;
 					 if (polarity.equalsIgnoreCase("neutral")) mneu++;
@@ -161,7 +167,78 @@ public class BomohPredictor {
 		return dic;
 	}
 	
-	private void score(String fn) throws IOException {
+
+
+	private HashMap<String, HashMap<String, String>> learn(String fn, String fn1) throws IOException, JSONException { // Learning hashtags
+		String modelFilename = "/cmu/arktweetnlp/model.20120919";
+		ArrayList<ArrayList<String>> store = new ArrayList<ArrayList<String>>();
+		ArrayList<String> newHashtags = new ArrayList<String>();
+		
+		List<TaggedToken> taggedTokens;
+		Tagger tagger = new Tagger();
+		tagger.loadModel(modelFilename);
+		 
+		BufferedReader br;
+		String line;
+		br = new BufferedReader(new FileReader(fn));
+		while((line = br.readLine()) != null){
+			JSONObject tweet = new JSONObject(line);
+			String text = tweet.getString("text");
+			
+			newHashtags = new ArrayList<String>();
+			taggedTokens = tagger.tokenizeAndTag(text);
+			for (TaggedToken t : taggedTokens){	
+				if (t.tag.equalsIgnoreCase("#")){ 
+					t.token = t.token.substring(1); // remove hashtag at front
+					newHashtags.add(t.token);
+				}
+				if (t.tag.equalsIgnoreCase("A")){
+					newHashtags.add(t.token);
+				}
+				if (t.tag.equalsIgnoreCase("N")){
+					newHashtags.add(t.token);
+				}
+			}
+			store.add(newHashtags);
+		}		
+		
+		int r;
+		String real, arr[];
+		ArrayList<Integer> gt = new ArrayList<Integer>();
+		br = new BufferedReader(new FileReader(fn1));
+		while((line = br.readLine()) != null){
+			arr = line.split(",");
+			real = arr[1];
+			if (real.equalsIgnoreCase("\"positive\"")) r=0;
+			else if (real.equalsIgnoreCase("\"negative\"")) r=1;
+			else r=2;
+			
+			gt.add(r);
+		}
+		br.close();
+		
+		HashMap<String, HashMap<String, String>> hm = new HashMap<String, HashMap<String, String>>();
+		HashMap<String, String> entry = new HashMap<String, String>();
+		String carr[] = {"positive", "negative", "neutral"};
+		
+		for (int i=0; i<gt.size(); i++){
+			ArrayList<String> newTokens = store.get(i);
+			String polarity = carr[gt.get(i)];
+			for (int j=0; j<newTokens.size(); j++){
+				entry = new HashMap<String, String>();
+				entry.put("word1", newTokens.get(j));
+				entry.put("pos1", "hashtag");
+				entry.put("priorpolarity", polarity);
+				
+				hm.put(newTokens.get(j), entry);
+			}
+		}
+		
+		return hm;
+	}
+	
+	
+	private void score(String fn, ArrayList<Integer> currPrediction) throws IOException {
 		BufferedReader br;
 		String line, real, arr[];
 		int r;
@@ -180,7 +257,7 @@ public class BomohPredictor {
 		br.close();
 		
 		// check size are the same
-		if (actual.size() != prediction.size()){
+		if (actual.size() != currPrediction.size()){
 			System.out.println("Predict & Actual size mismatch!");
 			return;
 		}
@@ -198,11 +275,11 @@ public class BomohPredictor {
 		for (int x=0; x<3; x++){ // 0/1/2 -> pos/neg/neu
 			tp = tp_fp = tp_fn = 0;
 			for (int i=0; i<actual.size();i++){
-				if (actual.get(i) == prediction.get(i) && actual.get(i)==x) tp++;
-				if (prediction.get(i) == x) tp_fp++;
+				if (actual.get(i) == currPrediction.get(i) && actual.get(i)==x) tp++;
+				if (currPrediction.get(i) == x) tp_fp++;
 				if (actual.get(i) == x) tp_fn++;
 			}
-			pre = (double)tp / tp_fp;
+			pre = (tp_fp > 0) ? (double)tp / tp_fp : 0;
 			rec = (double)tp / tp_fn;
 			f1 = (pre+rec != 0) ? 2 * (pre*rec) / (pre+rec) : 0; 
 			
@@ -228,7 +305,9 @@ public class BomohPredictor {
 	public static void main(String[] args) throws IOException, JSONException{
 		BomohPredictor bomoh = new BomohPredictor();
 		bomoh.run("TEST\\tweets_test.txt");
-		bomoh.score("TEST\\label_test.txt");
+		
+		//bomoh.score("TEST\\label_test.txt", bomoh.prediction);
+		bomoh.score("TEST\\label_test.txt", bomoh.mprediction);
 		
 		//bomoh.printPrediction();
 		
@@ -237,7 +316,5 @@ public class BomohPredictor {
 //			System.out.println(bomoh.tweetstore.get(i));
 //		}
 	}
-
-
 
 }
