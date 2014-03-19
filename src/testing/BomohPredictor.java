@@ -35,9 +35,8 @@ public class BomohPredictor {
 		
 		// 1.2 Learn from training data
 		HashMap<String, HashMap<String,String>> learnLex = learn("TRAIN\\tweets_train.txt", "TRAIN\\label_train.txt");
-
-		learnLex.putAll(mpqaLex);
-		mpqaLex = learnLex;
+		//learnLex.putAll(mpqaLex);
+		//mpqaLex = learnLex;
 		
 		//System.out.println(mpqaLex.get("abase").get("priorpolarity"));
 		
@@ -187,16 +186,17 @@ public class BomohPredictor {
 			
 			newHashtags = new ArrayList<String>();
 			taggedTokens = tagger.tokenizeAndTag(text);
-			for (TaggedToken t : taggedTokens){	
+			for (TaggedToken t : taggedTokens){
 				if (t.tag.equalsIgnoreCase("#")){ 
 					t.token = t.token.substring(1); // remove hashtag at front
-					newHashtags.add(t.token);
+					newHashtags.add(t.token.toLowerCase());
 				}
 				if (t.tag.equalsIgnoreCase("A")){
-					newHashtags.add(t.token);
+					
+					newHashtags.add(t.token.toLowerCase());
 				}
 				if (t.tag.equalsIgnoreCase("N")){
-					newHashtags.add(t.token);
+					newHashtags.add(t.token.toLowerCase());
 				}
 			}
 			store.add(newHashtags);
@@ -304,12 +304,13 @@ public class BomohPredictor {
 	
 	public static void main(String[] args) throws IOException, JSONException{
 		BomohPredictor bomoh = new BomohPredictor();
-		bomoh.run("TEST\\tweets_test.txt");
+		bomoh.run("data\\tweets.txt");
 		
 		//bomoh.score("TEST\\label_test.txt", bomoh.prediction);
-		bomoh.score("TEST\\label_test.txt", bomoh.mprediction);
+		//bomoh.score("TEST\\label_test.txt", bomoh.mprediction);
+		//bomoh.score("data\\tweets.txt", bomoh.mprediction);
 		
-		//bomoh.printPrediction();
+		bomoh.printPrediction();
 		
 //		for (int i=0; i<bomoh.prediction.size(); i++){
 //			System.out.print(bomoh.prediction.get(i) + "    ");
