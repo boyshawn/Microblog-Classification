@@ -1,9 +1,16 @@
 package testing;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +23,164 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 
 public class BomohPredictor {
 	
-	ArrayList<Integer> prediction = new ArrayList<Integer>();
-	ArrayList<Integer> mprediction = new ArrayList<Integer>();
-	ArrayList<Integer> actual = new ArrayList<Integer>();
-	ArrayList<String> tweetstore = new ArrayList<String>();
+	HashMap<String, HashMap<String,String>> basicLex;
+	Tagger tagger;
+	ArrayList<Integer> prediction, actual;
+	
+	public BomohPredictor(String fn) throws IOException{
+		HashMap<String, HashMap<String,String>> mpqaLex = readLexiconFromMPQA(fn);
+		basicLex = mpqaLex;
+		
+		String modelFilename = "/cmu/arktweetnlp/model.20120919";
+		tagger = new Tagger();
+		tagger.loadModel(modelFilename);
+		
+		prediction = new ArrayList<Integer>();
+		actual = new ArrayList<Integer>();
+	}
+	
+	public void coconutDropFromSky(){
+		System.out.println("A coconut has dropped onto your lap! Bomoh boleh! Coconut sedap!");
+	}
+	
+	private void train(String fntweets, String fnlabel, String ofn) throws IOException, JSONException {
+		// 1. read in training tweets & build vectors
+		ArrayList<ArrayList<String>> res = new ArrayList<ArrayList<String>>();
+		String line;
+		BufferedReader br;
+		br = new BufferedReader(new FileReader(fntweets));
+		while((line = br.readLine()) != null){
+			JSONObject tweet = new JSONObject(line);
+			String text = tweet.getString("text");
+			res.add(buildvector(text));
+		}
+		br.close();
+		
+		// 2. read labels
+		ArrayList<Integer> act = new ArrayList<Integer>();
+		String[] arr;
+		String real;
+		int r;
+		br = new BufferedReader(new FileReader(fnlabel));
+		while((line = br.readLine()) != null){
+			arr = line.split(",");
+			real = arr[1];
+			if (real.equalsIgnoreCase("\"positive\"")) r=0;
+			else if (real.equalsIgnoreCase("\"negative\"")) r=1;
+			else r=2;
+			act.add(r);
+		}
+		br.close();
+		
+		// 3. Combine gold standard + result vector. Write to file
+		if (act.size() != res.size()){ 
+			System.out.println("Size mismatch in BomohPredictor.train() !"); return;}
+		PrintWriter tw = new PrintWriter(new FileWriter(ofn));
+		for (int i=0; i<act.size(); i++){ 
+			line = Integer.toString(act.get(i)) + " " + stringify(res.get(i));
+			tw.println(line);
+		}
+		tw.close();
+		
+//		// 4. Trains SVM and outputs <ofn>.model in same DIR
+		PrintStream original = new PrintStream(System.out);
+		System.setOut(new PrintStream(new File(ofn+".scale")));
+		String argc[] = {"-s", "data\\TRAIN\\range", ofn};
+		br = new BufferedReader(new InputStreamReader(System.in));
+		svm_scale.main(argc);
+		System.setOut(original);
+		
+		String argv[] = {"-s", "0", "-t", "0", ofn+".scale"};
+		svm_train.main(argv);
+	}	
+	
+	private String stringify(ArrayList<String> arrayList) { // Flattens into printable form
+		StringBuilder sb = new StringBuilder();
+		
+		int index = 1;
+		for (String s : arrayList){
+			sb.append(index);
+			sb.append(":");
+			sb.append(s);
+			sb.append(" ");
+			++index;
+		}
 
-	private void run(String testDataFile) throws IOException, JSONException{
+		return sb.toString();
+	}
+
+	private ArrayList<String> buildvector(String text) { // input = tweet's text
+		List<TaggedToken> taggedTokens = tagger.tokenizeAndTag(text);
+		int pos, neg, neu;
+		pos = neg = neu = 0;
+		String word;
+		
+		for (TaggedToken t : taggedTokens){
+			word = t.token.toLowerCase();
+			if (basicLex.containsKey(word)){
+				 String polarity = basicLex.get(word).get("priorpolarity");
+				 if (polarity.equalsIgnoreCase("positive")) pos++;
+				 if (polarity.equalsIgnoreCase("negative")) neg++;
+				 if (polarity.equalsIgnoreCase("neutral")) neu++;
+			 }
+		}
+		
+		// build vector
+		/*
+		 * 1:pos 2:neg 3:neu
+		 * */
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(Integer.toString(pos));
+		result.add(Integer.toString(neg));
+		result.add(Integer.toString(neu));
+		
+		return result;
+	}
+
+	private void run(String fnmodel, String fntweets, String fnres) throws IOException, JSONException{
+		// 1. Read in testing tweets
+		ArrayList<ArrayList<String>> res = new ArrayList<ArrayList<String>>();
+		String line;
+		BufferedReader br;
+		br = new BufferedReader(new FileReader(fntweets));
+		while((line = br.readLine()) != null){
+			JSONObject tweet = new JSONObject(line);
+			String text = tweet.getString("text");
+			res.add(buildvector(text));
+		}
+		br.close();
+		
+		// 2. Write tweets in vector form to file
+		String ofn = fntweets + ".outvector";
+		PrintWriter tw = new PrintWriter(new FileWriter(ofn));
+		for (int i=0; i<res.size(); i++){
+			tw.println(stringify(res.get(i)));
+		}
+		tw.close();
+		
+		// 3. Classify & read results back into Bomoh
+		//Classifier.generateTestResult(fnmodel, ofn, fnres);
+		System.out.println(ofn);
+//		PrintStream original = new PrintStream(System.out);
+//		System.setOut(new PrintStream(new File(ofn+".scale")));
+		String argz[] = {"-r", "data\\TRAIN\\range", ofn};
+//		br = new BufferedReader(new InputStreamReader(System.in));
+		svm_scale.main(argz);
+//		System.setOut(original);
+		
+		svm_predict t = new svm_predict();
+		String args[] = {ofn+".scale", fnmodel, fnres}; 
+		t.main(args);
+		Double x;
+		br = new BufferedReader(new FileReader(fnres));
+		while((line = br.readLine()) != null){
+			x = Double.parseDouble(line);
+			prediction.add(x.intValue());
+		}
+		br.close();
+	}
+	
+	private void old_run(String testDataFile) throws IOException, JSONException{
 		
 		//////////////////////////////////////////////
 		// 1. Read in adjectives from general inquirer
@@ -39,89 +198,8 @@ public class BomohPredictor {
 		//mpqaLex = learnLex;
 		
 		//System.out.println(mpqaLex.get("abase").get("priorpolarity"));
-		
-		/////////////////////////////
-		// 2. read in training tweets
-		
-		String modelFilename = "/cmu/arktweetnlp/model.20120919";
-		List<TaggedToken> taggedTokens;
-		Tagger tagger = new Tagger();
-		tagger.loadModel(modelFilename);
-		 
-		BufferedReader br;
-		String line, word, mword;
-		int pos, neg, neu, pred;
-		int mpos, mneg, mneu, mpred;
-		br = new BufferedReader(new FileReader(testDataFile));
-		while((line = br.readLine()) != null){
-			
-			pos = neg = neu = 0;
-			mpos = mneg = mneu = 0;
-			JSONObject tweet = new JSONObject(line);
-			String text = tweet.getString("text");
-			tweetstore.add(text);
-			
-			
-			taggedTokens = tagger.tokenizeAndTag(text);
-			for (TaggedToken t : taggedTokens){	
-				if (t.tag.equalsIgnoreCase("#")){ t.token = t.token.substring(1); } // remove hashtag at front
-				word = t.token.toUpperCase();
-				mword = t.token.toLowerCase();
-				
-				 if (posLex.containsKey(word)) pos++;
-				 if (negLex.containsKey(word)) neg++;
-				 if (neuLex.containsKey(word)) neu++;
-				 
-				 if (mpqaLex.containsKey(mword)){
-					 String polarity = mpqaLex.get(mword).get("priorpolarity");
-					 if (polarity.equalsIgnoreCase("positive")) mpos++;
-					 if (polarity.equalsIgnoreCase("negative")) mneg++;
-					 if (polarity.equalsIgnoreCase("neutral")) mneu++;
-				 }
-			}
-			
-			/*
-			 * Scoring:
-			 * 	pos = pos > neg
-			 *	neg = neg > pos
-			 *	neu = no pos no neg or pos==neg
-			 * */
-			
-			if (pos > neg) pred=0;
-			else if (neg > pos) pred=1;
-			else pred=2;
-			prediction.add(pred);
-			
-			if (mpos > mneg) mpred=0;
-			else if (mneg > mpos) mpred=1;
-			else mpred=2;
-			mprediction.add(mpred);
-			
-			
-			//System.out.println(pos + " " + neg + " " + neu + " " + pred + " " + text);
-		}
-		 
-		br.close();
 	}
-	
-	private void coconutDropFromSky(String fn) throws IOException{
-		BufferedReader br;
-		String line;
-		String curr[];
-		ArrayList<ArrayList<String>> gold = new ArrayList<ArrayList<String>>(); 
 
-		br = new BufferedReader(new FileReader(fn));
-		while((line = br.readLine()) != null){
-			curr = line.split(",");
-			
-			gold.add(new ArrayList<String>());
-			
-		}
-		br.close();
-
-	}
-	
-	
 	private HashMap<String, Integer> readLexiconFromGI(String fn, Integer x) throws IOException{
 		BufferedReader br;
 		String line;
@@ -166,8 +244,6 @@ public class BomohPredictor {
 		return dic;
 	}
 	
-
-
 	private HashMap<String, HashMap<String, String>> learn(String fn, String fn1) throws IOException, JSONException { // Learning hashtags
 		String modelFilename = "/cmu/arktweetnlp/model.20120919";
 		ArrayList<ArrayList<String>> store = new ArrayList<ArrayList<String>>();
@@ -300,22 +376,26 @@ public class BomohPredictor {
 			System.out.println("" + i + ": " + disp[prediction.get(i)]);
 		}
 	}
-
 	
 	public static void main(String[] args) throws IOException, JSONException{
-		BomohPredictor bomoh = new BomohPredictor();
-		bomoh.run("data\\tweets.txt");
 		
-		//bomoh.score("TEST\\label_test.txt", bomoh.prediction);
-		//bomoh.score("TEST\\label_test.txt", bomoh.mprediction);
-		//bomoh.score("data\\tweets.txt", bomoh.mprediction);
+		final String mpqa = "data\\subjclueslen1-HLTEMNLP05.tff";
+		final String tweets_train = "data\\TRAIN\\tweets_train.txt";
+		final String label_train = "data\\TRAIN\\label_train.txt";
+		final String tweets_test = "data\\TEST\\tweets_test.txt";
+		final String label_test = "data\\TEST\\label_test.txt";
 		
-		bomoh.printPrediction();
+		String outFileName = "data\\TRAIN\\train_vector";
 		
-//		for (int i=0; i<bomoh.prediction.size(); i++){
-//			System.out.print(bomoh.prediction.get(i) + "    ");
-//			System.out.println(bomoh.tweetstore.get(i));
-//		}
+		BomohPredictor bomoh = new BomohPredictor(mpqa);
+		bomoh.train(tweets_train, label_train, outFileName);
+		
+		bomoh.run(outFileName + ".scale.model", tweets_test, "data\\TEST\\result");
+		bomoh.score(label_test, bomoh.prediction);
+		
+		//bomoh.printPrediction();
+		
 	}
+
 
 }

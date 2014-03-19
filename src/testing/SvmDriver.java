@@ -14,7 +14,7 @@ public class SvmDriver {
 		 * Below code reads in a data file and outputs a model called filename.model in the same folder
 		 * */
 		svm_train t = new svm_train();
-		String arr[] = {"data\\apple_p(basic).txt"};
+		String arr[] = {"data/TRAIN/train_vector.txt"};
 		t.run(arr);
 		
 		/* To use the model generated above to 'predict' data,

@@ -1,3 +1,0 @@
-slower
-greedy
-white
