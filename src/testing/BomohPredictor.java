@@ -17,6 +17,7 @@ import cmu.arktweetnlp.Tagger.TaggedToken;
 public class BomohPredictor {
 	
 	ArrayList<Integer> prediction = new ArrayList<Integer>();
+	ArrayList<Integer> actual = new ArrayList<Integer>();
 	ArrayList<String> tweetstore = new ArrayList<String>();
 
 	private void run(String testDataFile) throws IOException, JSONException{
@@ -28,6 +29,11 @@ public class BomohPredictor {
 		HashMap<String, Integer> negLex = readLexiconFromGI("data\\GI_negative.txt", 1); //1
 		HashMap<String, Integer> neuLex = readLexiconFromGI("data\\GI_neutral.txt", 2); //2
 		
+		// 1.1 Get MPQA
+		HashMap<String, HashMap<String,String>> mpqaLex = readLexiconFromMPQA("data\\subjclueslen1-HLTEMNLP05.tff");
+		
+		
+		//System.out.println(mpqaLex.get("abase").get("type"));
 		
 		/////////////////////////////
 		// 2. read in training tweets
@@ -40,10 +46,12 @@ public class BomohPredictor {
 		BufferedReader br;
 		String line, word;
 		int pos, neg, neu, pred;
+		int mpos, mneg, mneu;
 		br = new BufferedReader(new FileReader(testDataFile));
 		while((line = br.readLine()) != null){
 			
 			pos = neg = neu = 0;
+			mpos = mneg mneu = 0;
 			JSONObject tweet = new JSONObject(line);
 			String text = tweet.getString("text");
 			tweetstore.add(text);
@@ -57,6 +65,13 @@ public class BomohPredictor {
 				 if (posLex.containsKey(word)) pos++;
 				 if (negLex.containsKey(word)) neg++;
 				 if (neuLex.containsKey(word)) neu++;
+				 
+				 if (mpqaLex.containsKey(word)){
+					 String polarity = mpqaLex.get(word).get("priorpolarity");
+					 if (polarity.equalsIgnoreCase("positive")) mpos++;
+					 if (polarity.equalsIgnoreCase("negative")) mneg++;
+					 if (polarity.equalsIgnoreCase("neutral")) mneu++;
+				 }
 			}
 			
 			/*
@@ -71,7 +86,7 @@ public class BomohPredictor {
 			else pred=2;
 			
 			prediction.add(pred);
-			System.out.println(pos + " " + neg + " " + neu + " " + pred + " " + text);
+			//System.out.println(pos + " " + neg + " " + neu + " " + pred + " " + text);
 		}
 		 
 		br.close();
@@ -109,12 +124,94 @@ public class BomohPredictor {
 		return Lexicon;
 	}
 	
+	HashMap<String, HashMap<String, String>> readLexiconFromMPQA(String fn) throws IOException{
+		BufferedReader br;
+		String line, key="";
+		String[] parts, values;
+		int i;
+		HashMap<String, HashMap<String, String>> dic = new HashMap<String, HashMap<String, String>>();
+		HashMap<String,String> entry;
+
+		// type=weaksubj len=1 word1=abandoned pos1=adj stemmed1=n priorpolarity=negative
+		br = new BufferedReader(new FileReader(fn));
+		while((line = br.readLine()) != null){ 
+			entry = new HashMap<String,String>();
+			parts = line.split(" ");
+			if (parts.length==6){
+				for (i=0; i<6; i++){
+					values = parts[i].split("=");
+					entry.put(values[0], values[1]);
+					if (i==2){ // use 'word1' as key
+						key = values[1];
+					}
+				}
+			}
+			
+			dic.put(key, entry);
+		}
+		br.close();
+		
+		return dic;
+	}
+	
+	private void score(String fn) throws IOException {
+		BufferedReader br;
+		String line, real, arr[];
+		int r;
+		actual = new ArrayList<Integer>();
+
+		br = new BufferedReader(new FileReader(fn));
+		while((line = br.readLine()) != null){
+			arr = line.split(",");
+			real = arr[1];
+			if (real.equalsIgnoreCase("\"positive\"")) r=0;
+			else if (real.equalsIgnoreCase("\"negative\"")) r=1;
+			else r=2;
+			
+			actual.add(r);
+		}
+		br.close();
+		
+		// check size are the same
+		if (actual.size() != prediction.size()){
+			System.out.println("Predict & Actual size mismatch!");
+			return;
+		}
+		
+		/*
+		 * Split into
+		 * 	pos | neg+neu
+		 *  neg | pos+neu
+		 *  neu | pos+neg
+		 * */
+		
+		int tp, tp_fp, tp_fn;
+		double pre, rec, f1;
+		
+		for (int x=0; x<3; x++){ // 0/1/2 -> pos/neg/neu
+			tp = tp_fp = tp_fn = 0;
+			for (int i=0; i<actual.size();i++){
+				if (actual.get(i) == prediction.get(i) && actual.get(i)==x) tp++;
+				if (prediction.get(i) == x) tp_fp++;
+				if (actual.get(i) == x) tp_fn++;
+			}
+			pre = (double)tp / tp_fp;
+			rec = (double)tp / tp_fn;
+			f1 = (pre+rec != 0) ? 2 * (pre*rec) / (pre+rec) : 0; 
+		}
+		
+	}
+	
 	public static void main(String[] args) throws IOException, JSONException{
 		BomohPredictor bomoh = new BomohPredictor();
 		bomoh.run("TEST\\tweets_test.txt");
+		bomoh.score("TEST\\label_test.txt");
+		
 //		for (int i=0; i<bomoh.prediction.size(); i++){
 //			System.out.print(bomoh.prediction.get(i) + "    ");
 //			System.out.println(bomoh.tweetstore.get(i));
 //		}
 	}
+
+
 }
