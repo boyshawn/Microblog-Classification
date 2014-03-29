@@ -176,7 +176,7 @@ public class Indexer {
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
 					Version.LUCENE_CURRENT, new StandardAnalyzer(Version.LUCENE_CURRENT, getStopwords()));
 
-			indexWriter = new IndexWriter(idx, indexWriterConfig);
+			//indexWriter = new IndexWriter(idx, indexWriterConfig);
 
 		}
 		return indexWriter;
@@ -293,7 +293,7 @@ public class Indexer {
 		//StandardAnalyzer ana = new StandardAnalyzer(Version.LUCENE_CURRENT);
 		TokenStream tokenStream = new StandardTokenizer(Version.LUCENE_CURRENT,new StringReader(string));
 		StringBuilder sb = new StringBuilder();
-		tokenStream = new StopFilter(Version.LUCENE_CURRENT, tokenStream, getStopwords());
+		//tokenStream = new StopFilter(Version.LUCENE_CURRENT, tokenStream, getStopwords());
 		tokenStream = new PorterStemFilter(tokenStream);
 		CharTermAttribute token = tokenStream.getAttribute(CharTermAttribute.class);
 		while (tokenStream.incrementToken()) 

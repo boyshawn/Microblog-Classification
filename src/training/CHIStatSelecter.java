@@ -672,7 +672,7 @@ private void generateCombined(String typeSign, String key1, String key2, String 
 	        	}
 	        	System.out.println("ScoreDoc queryString: " + queryString);
 				if(textArray!=null){
-					Query query = new QueryParser(Version.LUCENE_CURRENT, "text", new StandardAnalyzer(Version.LUCENE_36)).parse(queryString);
+					Query query = new QueryParser(Version.LUCENE_CURRENT, "text", new StandardAnalyzer(Version.LUCENE_30)).parse(queryString);
 					TopDocs similarDocs = getFromSearcher.search(query, want); // Use the searcher
 	//				System.out.println("ScoreDoc Q: "+j+" "+ similarDocs.scoreDocs.length);
 					for(int i=0; i<similarDocs.scoreDocs.length; i++){
