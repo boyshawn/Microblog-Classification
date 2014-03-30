@@ -55,6 +55,7 @@ public class TweetSearch {
 				query.setCount(NUMBER_OF_TWEET_TO_RETRIEVE - jsonTweets.size());
 
 			try {
+				//A trial run reveal that the result retrieved is unqiue
 				QueryResult result = twitter.search(query);
 
 				//Convert the tweet to JSON object
@@ -66,7 +67,7 @@ public class TweetSearch {
 					jsonTweets.add(jsonStatus);
 				}
 
-				System.out.println("Gathered " + jsonTweets.size() + " tweets");
+				System.out.println(queryString + ": Gathered " + jsonTweets.size() + " tweets");
 
 				for (JSONObject t: jsonTweets){ 
 					if(t.getLong("id") < lastID){ 
@@ -77,7 +78,7 @@ public class TweetSearch {
 			catch (TwitterException te) {
 				te.printStackTrace();
 				System.out.println("Failed to search tweets: " + te.getMessage());
-				System.exit(-1);
+				return jsonTweets;
 			} catch (JSONException e) {
 				System.out.println("Cannot convert to JSON object: " + e);
 				e.printStackTrace();

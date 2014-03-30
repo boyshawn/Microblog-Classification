@@ -32,79 +32,33 @@ public class PlayAround {
 		configBuilder.setOAuthAccessToken("2416996622-FvpVEzCFF2zRKoVZ0ghSL8f2zPreZiHTALSMFyA");
 		configBuilder.setOAuthAccessTokenSecret("S0rDfW0Vp8MoIGeHYZMWuBibvEnOFN384z35T8wb7aQOq");
 		configBuilder.setJSONStoreEnabled(true);
-
-		List<JSONObject> jsonResults = TweetSearch.singleQuerySearch("Manchester City", configBuilder.build());
 		
-		//Writing to a single file
-		String baseDirectory = "Resource";
-		String fileName = "Manchester City".replace(' ', '_');
+		final String baseDirectory = "Resource";
+		String queryFilePath = baseDirectory + File.separator + "Queries" + File.separator + "Manchester_United";
 		
-		File outputFile = new File(baseDirectory + File.separator + fileName);
-		outputFile.createNewFile();
-		System.out.println(outputFile.exists());
-		
-		if(outputFile.exists()){
-			BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-			
-			for(JSONObject jsonStatus: jsonResults){
-				writer.write(jsonStatus.toString());
-				writer.newLine();
-			}
-			
-			writer.close();
-		}
+		FileHelper.writeQueryFileToSingleFolder(baseDirectory, queryFilePath, configBuilder.build());
 		
 		final long endTime = System.currentTimeMillis();
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
-		
+
 	}
+
 	
-	public static void lolo(String[] args){
+
+	public static void lolo(String wsdcs) throws IOException{
 		final long startTime = System.currentTimeMillis();
-		
-		String fileName = "Resource/Manchester_United";
-		String[] queries = retriveQueriesTermFromFile(fileName);
-		
-		for(int i = 0; i<queries.length; i++){
-			System.out.println(queries[i]);
-		}
 
-		//TweetSearch.search(queriesArray, configuration);
+		String baseDirectory = "Resource";
+		String queryFileName = "Manchester_United";
+
+		//Test creating all the different file and folder
+
+
 		final long endTime = System.currentTimeMillis();
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
 	}
+
 	
-	public static String[] retriveQueriesTermFromFile(String fileName){
-		File queryFile = new File(fileName);
-
-		String line;
-		BufferedReader reader = null;
-
-		try {
-			reader = new BufferedReader(new FileReader(queryFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		List<String> queries = new ArrayList<String>();
-
-		try {
-			while( (line = reader.readLine()) != null){
-				if(!line.startsWith("//")){	//The text file contain some comments
-					queries.add(line);
-				}
-				
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (NullPointerException e){
-			e.printStackTrace();
-		}
-		
-		return queries.toArray(new String[queries.size()]);	//Convert list to array
-	}
-
 }
