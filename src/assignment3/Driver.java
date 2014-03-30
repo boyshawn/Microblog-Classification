@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-public class PlayAround {
+public class Driver {
 
 	public static void main(String[] args) throws IOException {	
 		final long startTime = System.currentTimeMillis();
@@ -30,17 +30,17 @@ public class PlayAround {
 				+ "Application_data_credential";
 		
 		try {
-			ConfigurationBuilder configBuilder = FileHelper
-					.readConfigurationBuilderFromFile(fileName);
+			List<Configuration> configurations = FileHelper
+					.readConfigurationFromFile(fileName);
+			
+			final String baseDirectory = "Resource";
+			String queryFilePath = baseDirectory + File.separator + "Queries" + File.separator + "Manchester_United";
+
+			FileHelper.writeQueryFileToSingleFolder(baseDirectory, queryFilePath, configurations);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-//		final String baseDirectory = "Resource";
-//		String queryFilePath = baseDirectory + File.separator + "Queries" + File.separator + "Manchester_United";
-//
-//		FileHelper.writeQueryFileToSingleFolder(baseDirectory, queryFilePath, configBuilder.build());
-
 		final long endTime = System.currentTimeMillis();
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
@@ -48,12 +48,11 @@ public class PlayAround {
 
 
 
-	public static void lolo(String wsdcs) throws IOException{
+	public static void lolo(int[] args) throws IOException{
 		final long startTime = System.currentTimeMillis();
-
-		String baseDirectory = "Resource";
-		String queryFileName = "Manchester_United";
-
+		
+		String gogogo = "";
+		System.out.println(gogogo.isEmpty());		
 		//Test creating all the different file and folder
 
 

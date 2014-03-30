@@ -47,7 +47,9 @@ public class FileHelper {
 		return queries.toArray(new String[queries.size()]);	//Convert list to array
 	}
 
-	public static void writeQueryFileToSingleFolder(String baseDirectory, String queryFilePath, Configuration configuration) throws IOException{
+	public static void writeQueryFileToSingleFolder(String baseDirectory,
+			String queryFilePath, List<Configuration> configurations)
+			throws IOException {
 		File queryFile = new File(queryFilePath);
 
 		//All the query from a query file will be stored in the same directory
@@ -59,7 +61,7 @@ public class FileHelper {
 
 		String[] queries = FileHelper.retriveQueriesTermFromFile(queryFile);
 
-		Map<String, List<JSONObject>> queryResultMap = TweetSearch.search(queries, configuration);
+		Map<String, List<JSONObject>> queryResultMap = TweetSearch.search(queries, configurations);
 
 		for(String query : queries){
 			writeToSingleFile(queryDirectory.getAbsolutePath(), query, queryResultMap.get(query));
@@ -92,37 +94,61 @@ public class FileHelper {
 		}
 	}
 
-	public static ConfigurationBuilder readConfigurationBuilderFromFile(String filePath) throws Exception{
+	public static List<Configuration> readConfigurationFromFile(String filePath) throws Exception{
 		String line;
 		BufferedReader reader = null;
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-
+		
 		reader = new BufferedReader(new FileReader(new File(filePath)));
-
+		List<Configuration> configurations = new ArrayList<Configuration>();
+		
+		String consumerKey = "";
+		String consumerSecret = "";
+		String accessToken = "";
+		String accessTokenSecret = "";
+		
 		while( (line = reader.readLine()) != null){
+			
 			String[] lineToken = line.split(" ");
 
 			if(line.contains("Consumer Key")){
-				configBuilder.setOAuthConsumerKey(
-						lineToken[lineToken.length - 1]);
+				consumerKey = lineToken[lineToken.length - 1];
 			}
 
 			else if(line.contains("Consumer Secret")){
-				configBuilder.setOAuthConsumerSecret(
-						lineToken[lineToken.length - 1]);
+				consumerSecret = lineToken[lineToken.length - 1];
 			}
-			else if(line.contains("Access Token")){
-				configBuilder.setOAuthAccessToken(
-						lineToken[lineToken.length - 1]);
-			}
+			
 			else if(line.contains("Access Token Secret")){
-				configBuilder.setOAuthAccessTokenSecret(
-						lineToken[lineToken.length - 1]);
+				accessTokenSecret = lineToken[lineToken.length - 1];
+			}
+			
+			else if(line.contains("Access Token")){
+				accessToken = lineToken[lineToken.length - 1];
+			}
+			
+			
+			if(	!consumerKey.isEmpty() && !consumerSecret.isEmpty() &&
+				!accessToken.isEmpty() && !accessTokenSecret.isEmpty()){
+
+				ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+				
+				configBuilder.setOAuthConsumerKey(consumerKey);
+				configBuilder.setOAuthConsumerSecret(consumerSecret);
+				configBuilder.setOAuthAccessToken(accessToken);
+				configBuilder.setOAuthAccessTokenSecret(accessTokenSecret);
+				configBuilder.setJSONStoreEnabled(true);
+				
+				configurations.add(configBuilder.build());
+				
+				consumerKey = "";
+				consumerSecret = "";
+				accessToken = "";
+				accessTokenSecret = "";
 			}
 		}
-		configBuilder.setJSONStoreEnabled(true);
+		
 		reader.close();
 
-		return configBuilder;
+		return configurations;
 	}
 }
