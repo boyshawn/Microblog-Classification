@@ -10,16 +10,20 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 public class PlayAround {
 
-	public static void lolo(String[] args) {	
+	public static void main(String[] args) throws IOException {	
 		final long startTime = System.currentTimeMillis();
 		//Create the configuration file
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
@@ -29,7 +33,26 @@ public class PlayAround {
 		configBuilder.setOAuthAccessTokenSecret("S0rDfW0Vp8MoIGeHYZMWuBibvEnOFN384z35T8wb7aQOq");
 		configBuilder.setJSONStoreEnabled(true);
 
-		TweetSearch.singleQuerySearch("Manchester City", configBuilder.build());
+		List<JSONObject> jsonResults = TweetSearch.singleQuerySearch("Manchester City", configBuilder.build());
+		
+		//Writing to a single file
+		String baseDirectory = "Resource";
+		String fileName = "Manchester City".replace(' ', '_');
+		
+		File outputFile = new File(baseDirectory + File.separator + fileName);
+		outputFile.createNewFile();
+		System.out.println(outputFile.exists());
+		
+		if(outputFile.exists()){
+			BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+			
+			for(JSONObject jsonStatus: jsonResults){
+				writer.write(jsonStatus.toString());
+				writer.newLine();
+			}
+			
+			writer.close();
+		}
 		
 		final long endTime = System.currentTimeMillis();
 		double timeTaken = (endTime - startTime)/ 100;
@@ -37,12 +60,20 @@ public class PlayAround {
 		
 	}
 	
-	public static void main(String[] args){
-		String fileName = "src/assignment3/keywords";
-		File queryFile = new File(fileName);
-		System.out.println(queryFile.exists());
+	public static void lolo(String[] args){
+		final long startTime = System.currentTimeMillis();
+		
+		String fileName = "Resource/Manchester_United";
+		String[] queries = retriveQueriesTermFromFile(fileName);
+		
+		for(int i = 0; i<queries.length; i++){
+			System.out.println(queries[i]);
+		}
 
 		//TweetSearch.search(queriesArray, configuration);
+		final long endTime = System.currentTimeMillis();
+		double timeTaken = (endTime - startTime)/ 100;
+		System.out.println("Total execution time: " + timeTaken );
 	}
 	
 	public static String[] retriveQueriesTermFromFile(String fileName){
@@ -66,13 +97,14 @@ public class PlayAround {
 				}
 				
 			}
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e){
 			e.printStackTrace();
 		}
-
-		return queries.toArray(new String[queries.size()]);
+		
+		return queries.toArray(new String[queries.size()]);	//Convert list to array
 	}
 
 }

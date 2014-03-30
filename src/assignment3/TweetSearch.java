@@ -18,7 +18,7 @@ import twitter4j.TwitterObjectFactory;
 import twitter4j.conf.Configuration;
 
 public class TweetSearch {
-	public final static int NUMBER_OF_TWEET_TO_RETRIEVE = 1000;
+	public final static int NUMBER_OF_TWEET_TO_RETRIEVE = 500;
 
 	public static Map<String, List<JSONObject>> search(String[] queries, Configuration configuration) {
 		if (queries.length < 1) {
