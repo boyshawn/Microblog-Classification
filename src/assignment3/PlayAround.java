@@ -6,6 +6,7 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.BufferedReader;
@@ -18,39 +19,60 @@ import java.util.List;
 
 public class PlayAround {
 
-	public static void main(String[] args) {		
+	public static void lolo(String[] args) {	
+		final long startTime = System.currentTimeMillis();
 		//Create the configuration file
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.setOAuthConsumerKey("nZlvDk5VT8eIvtDBV2kCtCiim");
-		configBuilder.setOAuthConsumerSecret("z1KMbcOrTlSd4HrrYAaa0ZVefvzdb10nv50ZrEdZ91uNtW5eoX");
-		configBuilder.setOAuthAccessToken("117599242-zOYzJqyg3S1twciaaMk5SsXKFGUnHxdSYYfwpZgC");
-		configBuilder.setOAuthAccessTokenSecret("c8dsE4b4ID1LVQpEfCTpfp8r2OFwZgrVOSuNdHrt79Fcf");
+		configBuilder.setOAuthConsumerKey("M05ZmqSEmbkF58R3lkXqkw");
+		configBuilder.setOAuthConsumerSecret("7Ek6APNfrnDGjTd6C7MjywXPBHSsufXLXf3FEe2qMN8");
+		configBuilder.setOAuthAccessToken("2416996622-FvpVEzCFF2zRKoVZ0ghSL8f2zPreZiHTALSMFyA");
+		configBuilder.setOAuthAccessTokenSecret("S0rDfW0Vp8MoIGeHYZMWuBibvEnOFN384z35T8wb7aQOq");
+		configBuilder.setJSONStoreEnabled(true);
+
+		TweetSearch.singleQuerySearch("Manchester City", configBuilder.build());
 		
-		File queryFile = new File("src/assignment3/keywords");
+		final long endTime = System.currentTimeMillis();
+		double timeTaken = (endTime - startTime)/ 100;
+		System.out.println("Total execution time: " + timeTaken );
 		
+	}
+	
+	public static void main(String[] args){
+		String fileName = "src/assignment3/keywords";
+		File queryFile = new File(fileName);
+		System.out.println(queryFile.exists());
+
+		//TweetSearch.search(queriesArray, configuration);
+	}
+	
+	public static String[] retriveQueriesTermFromFile(String fileName){
+		File queryFile = new File(fileName);
+
 		String line;
 		BufferedReader reader = null;
-		
+
 		try {
 			reader = new BufferedReader(new FileReader(queryFile));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		List<String> queries = new ArrayList<String>();
-		
+
 		try {
 			while( (line = reader.readLine()) != null){
-				queries.add(line);
+				if(!line.startsWith("//")){	//The text file contain some comments
+					queries.add(line);
+				}
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e){
 			e.printStackTrace();
 		}
-		
-		String[] queriesArray = queries.toArray(new String[queries.size()]);
-		
-		TweetSearch.search(queriesArray, configBuilder.build());
-    }
+
+		return queries.toArray(new String[queries.size()]);
+	}
+
 }
