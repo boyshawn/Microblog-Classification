@@ -25,26 +25,28 @@ public class PlayAround {
 
 	public static void main(String[] args) throws IOException {	
 		final long startTime = System.currentTimeMillis();
-		//Create the configuration file
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.setOAuthConsumerKey("M05ZmqSEmbkF58R3lkXqkw");
-		configBuilder.setOAuthConsumerSecret("7Ek6APNfrnDGjTd6C7MjywXPBHSsufXLXf3FEe2qMN8");
-		configBuilder.setOAuthAccessToken("2416996622-FvpVEzCFF2zRKoVZ0ghSL8f2zPreZiHTALSMFyA");
-		configBuilder.setOAuthAccessTokenSecret("S0rDfW0Vp8MoIGeHYZMWuBibvEnOFN384z35T8wb7aQOq");
-		configBuilder.setJSONStoreEnabled(true);
 		
-		final String baseDirectory = "Resource";
-		String queryFilePath = baseDirectory + File.separator + "Queries" + File.separator + "Manchester_United";
+		String fileName = "Resource" + File.separator
+				+ "Application_data_credential";
 		
-		FileHelper.writeQueryFileToSingleFolder(baseDirectory, queryFilePath, configBuilder.build());
+		try {
+			ConfigurationBuilder configBuilder = FileHelper
+					.readConfigurationBuilderFromFile(fileName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
+//		final String baseDirectory = "Resource";
+//		String queryFilePath = baseDirectory + File.separator + "Queries" + File.separator + "Manchester_United";
+//
+//		FileHelper.writeQueryFileToSingleFolder(baseDirectory, queryFilePath, configBuilder.build());
+
 		final long endTime = System.currentTimeMillis();
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
-
 	}
 
-	
+
 
 	public static void lolo(String wsdcs) throws IOException{
 		final long startTime = System.currentTimeMillis();
@@ -59,6 +61,4 @@ public class PlayAround {
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
 	}
-
-	
 }

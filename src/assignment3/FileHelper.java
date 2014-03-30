@@ -14,6 +14,7 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class FileHelper {
 	public static String[] retriveQueriesTermFromFile(File queryFile){
@@ -34,7 +35,7 @@ public class FileHelper {
 				if(!line.startsWith("//")){	//The text file contain some comments
 					queries.add(line);
 				}
-				
+
 			}
 			reader.close();
 		} catch (IOException e) {
@@ -42,29 +43,29 @@ public class FileHelper {
 		} catch (NullPointerException e){
 			e.printStackTrace();
 		}
-		
+
 		return queries.toArray(new String[queries.size()]);	//Convert list to array
 	}
 
 	public static void writeQueryFileToSingleFolder(String baseDirectory, String queryFilePath, Configuration configuration) throws IOException{
 		File queryFile = new File(queryFilePath);
-		
+
 		//All the query from a query file will be stored in the same directory
 		File queryDirectory = new File(baseDirectory + File.separator + queryFile.getName());
 
 		if(!queryDirectory.isDirectory()){
 			queryDirectory.mkdirs();
 		}
-		
+
 		String[] queries = FileHelper.retriveQueriesTermFromFile(queryFile);
-		
+
 		Map<String, List<JSONObject>> queryResultMap = TweetSearch.search(queries, configuration);
-		
+
 		for(String query : queries){
 			writeToSingleFile(queryDirectory.getAbsolutePath(), query, queryResultMap.get(query));
 		}
 	}
-	
+
 	public static void writeToSingleFile(String baseDirectory, String fileName,
 			List<JSONObject> jsonQueryResult) throws IOException {
 
@@ -89,5 +90,39 @@ public class FileHelper {
 
 			writer.close();
 		}
+	}
+
+	public static ConfigurationBuilder readConfigurationBuilderFromFile(String filePath) throws Exception{
+		String line;
+		BufferedReader reader = null;
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+
+		reader = new BufferedReader(new FileReader(new File(filePath)));
+
+		while( (line = reader.readLine()) != null){
+			String[] lineToken = line.split(" ");
+
+			if(line.contains("Consumer Key")){
+				configBuilder.setOAuthConsumerKey(
+						lineToken[lineToken.length - 1]);
+			}
+
+			else if(line.contains("Consumer Secret")){
+				configBuilder.setOAuthConsumerSecret(
+						lineToken[lineToken.length - 1]);
+			}
+			else if(line.contains("Access Token")){
+				configBuilder.setOAuthAccessToken(
+						lineToken[lineToken.length - 1]);
+			}
+			else if(line.contains("Access Token Secret")){
+				configBuilder.setOAuthAccessTokenSecret(
+						lineToken[lineToken.length - 1]);
+			}
+		}
+		configBuilder.setJSONStoreEnabled(true);
+		reader.close();
+
+		return configBuilder;
 	}
 }
