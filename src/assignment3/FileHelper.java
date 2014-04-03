@@ -7,10 +7,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.json.JSONObject;
 
 import twitter4j.conf.Configuration;
@@ -167,7 +171,13 @@ public class FileHelper {
 		String[] matchDetails = match.split("\t");
 		
 		//Date
-		String date = matchDetails[0];
+		String rawDate = matchDetails[0];
+		
+		//Date massage
+		String[] dateSplit = rawDate.split("/");
+		LocalDate date = new LocalDate(Integer.parseInt(dateSplit[2]),
+				Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]));
+		
 		String time = matchDetails[1];
 		String homeTeam = matchDetails[2];
 		String awayTeam = matchDetails[4];

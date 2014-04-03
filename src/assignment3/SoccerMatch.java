@@ -1,9 +1,14 @@
 package assignment3;
 
+import java.text.SimpleDateFormat;
+
+import org.joda.time.LocalDate;
+
+
 public class SoccerMatch {
 	//Attributes
 	//Date      Time    Home Team           Away Team   Full Time (Half Time) 
-	private String date;
+	private LocalDate date;
 	private String time;
 	private String homeTeam;
 	private String awayTeam;
@@ -12,7 +17,7 @@ public class SoccerMatch {
 	private int awayTeamScore;
 	
 	//Constructor
-	public SoccerMatch(String date, String time, String homeTeam,
+	public SoccerMatch(LocalDate date, String time, String homeTeam,
 			String awayTeam, int homeTeamScore, int awayTeamScore,
 			String halfTimeScore) {
 		
@@ -25,11 +30,15 @@ public class SoccerMatch {
 		this.halfTimeScore = halfTimeScore;
 	}
 
-	public String getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
+	
+	public String getDateString(){
+		return date.toString();
+	}
 
-	public void setDate(String date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 
@@ -95,7 +104,7 @@ public class SoccerMatch {
 	
 	@Override
 	public String toString(){
-		return date + " " + time + " " + homeTeam + " " + awayTeam + " "
+		return date.toString() + " " + time + " " + homeTeam + " " + awayTeam + " "
 				+ homeTeamScore + ":" + awayTeamScore + " " + halfTimeScore;
 	}
 	
