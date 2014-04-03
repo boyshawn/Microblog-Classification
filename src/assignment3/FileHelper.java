@@ -17,6 +17,16 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class FileHelper {
+	
+	/**
+	 * Extract all the query line by line from the query file
+	 * 
+	 * @param queryFile
+	 *            the file containing all the query terms
+	 * @return a list of query
+	 * @deprecated Not longer using this
+	 * 
+	 */
 	public static String[] retriveQueriesTermFromFile(File queryFile){
 
 		String line;
@@ -150,5 +160,24 @@ public class FileHelper {
 		reader.close();
 
 		return configurations;
+	}
+	
+	public static SoccerMatch extractOneSoccerMatch(String match){
+		//17/8/2013	12:45	Liverpool FC	-	Stoke City	1:0 (1:0)
+		String[] matchDetails = match.split("\t");
+		
+		//Date
+		String date = matchDetails[0];
+		String time = matchDetails[1];
+		String homeTeam = matchDetails[2];
+		String awayTeam = matchDetails[4];
+		
+		String fullTimeScore = matchDetails[5];
+		String[] scoreDetails = fullTimeScore.split("[: ()]");
+		int homeTeamScore = Integer.parseInt(scoreDetails[0]);
+		int awayTeamScore = Integer.parseInt(scoreDetails[1]);
+		String halfTimeScore = scoreDetails[3] + ":" + scoreDetails[4];
+		
+		return new SoccerMatch(date, time, homeTeam, awayTeam, homeTeamScore, awayTeamScore, halfTimeScore);
 	}
 }
