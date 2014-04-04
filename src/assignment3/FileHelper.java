@@ -75,7 +75,7 @@ public class FileHelper {
 
 		String[] queries = FileHelper.retriveQueriesTermFromFile(queryFile);
 
-		Map<String, List<JSONObject>> queryResultMap = TweetSearch.search(queries, configurations);
+		Map<String, List<JSONObject>> queryResultMap = TweetSearch.multipleQueriesSearch(queries, configurations);
 
 		for(String query : queries){
 			writeToSingleFile(queryDirectory.getAbsolutePath(), query, queryResultMap.get(query));
@@ -164,30 +164,5 @@ public class FileHelper {
 		reader.close();
 
 		return configurations;
-	}
-	
-	public static SoccerMatch extractOneSoccerMatch(String match){
-		//17/8/2013	12:45	Liverpool FC	-	Stoke City	1:0 (1:0)
-		String[] matchDetails = match.split("\t");
-		
-		//Date
-		String rawDate = matchDetails[0];
-		
-		//Date massage
-		String[] dateSplit = rawDate.split("/");
-		LocalDate date = new LocalDate(Integer.parseInt(dateSplit[2]),
-				Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]));
-		
-		String time = matchDetails[1];
-		String homeTeam = matchDetails[2];
-		String awayTeam = matchDetails[4];
-		
-		String fullTimeScore = matchDetails[5];
-		String[] scoreDetails = fullTimeScore.split("[: ()]");
-		int homeTeamScore = Integer.parseInt(scoreDetails[0]);
-		int awayTeamScore = Integer.parseInt(scoreDetails[1]);
-		String halfTimeScore = scoreDetails[3] + ":" + scoreDetails[4];
-		
-		return new SoccerMatch(date, time, homeTeam, awayTeam, homeTeamScore, awayTeamScore, halfTimeScore);
 	}
 }
