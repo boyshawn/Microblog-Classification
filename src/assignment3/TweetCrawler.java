@@ -95,11 +95,11 @@ public class TweetCrawler {
 		crawlTillDate = 5;
 
 		// Reset files
-		filenameall = query + sinceDate + "_HTTPS_RESPONSE.html";
+		filenameall = "Resource" + File.separator + query + sinceDate + "_HTTPS_RESPONSE.html";
 		File f = new File(filenameall);
 		f.delete();
 		
-		filenamecompile = query + sinceDate + "_JSON_COMPILE_TWEETS.txt";
+		filenamecompile = "Resource" + File.separator + query + sinceDate + "_JSON_COMPILE_TWEETS.txt";
 		File fc = new File(filenamecompile);
 		fc.delete();
 		
