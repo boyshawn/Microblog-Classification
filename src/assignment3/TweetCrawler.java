@@ -82,7 +82,7 @@ public class TweetCrawler {
 				+ "&src=typd&include_available_features=1&include_entities=1&scroll_cursor=";
 	}
 
-	public List<JSONObject> testIt() {
+	public List<String> testIt() {
 		// Month(1-12) and Date(1-31) to be that of the first tweet, 
 		crawlTillMonth = 4;
 		crawlTillDate = 5;
@@ -96,7 +96,7 @@ public class TweetCrawler {
 		File fc = new File(filenamecompile);
 		fc.delete();
 		
-		List<JSONObject> jsonAllCrawl = new ArrayList<JSONObject>();
+		List<String> allTweetTexts = new ArrayList<String>();
 		
 		try {
 			//to test for one crawl
@@ -142,11 +142,11 @@ public class TweetCrawler {
 //			}
 			
 			//The HTTP way
-			int oldSize = jsonAllCrawl.size() -1;
-			while(jsonAllCrawl.size() > oldSize && jsonAllCrawl.size()<20){
-				System.out.println(jsonAllCrawl.size());
-				oldSize = jsonAllCrawl.size();
-				jsonAllCrawl.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
+			int oldSize = allTweetTexts.size() -1;
+			while(allTweetTexts.size() > oldSize && allTweetTexts.size()<20){
+				System.out.println(allTweetTexts.size());
+				oldSize = allTweetTexts.size();
+				allTweetTexts.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
 			}
 			
 		} catch (MalformedURLException e) {
@@ -155,10 +155,10 @@ public class TweetCrawler {
 			e.printStackTrace();
 		}
 		
-		return jsonAllCrawl;
+		return allTweetTexts;
 	}
 
-	public List<JSONObject> crawlURL(String scroll_cursor, String filename)
+	public List<String> crawlURL(String scroll_cursor, String filename)
 			throws IOException {
 		URL url;
 		url = new URL(https_url + scroll_cursor);
@@ -168,14 +168,14 @@ public class TweetCrawler {
 		print_https_cert(con);
 
 		// dump all the content
-		List<JSONObject> jsonAllContent = print_content(con, filename);
+		List<String> allTweetText = print_content(con, filename);
 		
-		return jsonAllContent;
+		return allTweetText;
 
 	}
 	
-	private List<JSONObject> print_content(HttpsURLConnection con, String filename) {
-		List<JSONObject> jsonAllContent = new ArrayList<JSONObject>();
+	private List<String> print_content(HttpsURLConnection con, String filename) {
+		List<String> allTweetText = new ArrayList<String>();
 		
 		if (con != null) {
 
@@ -241,6 +241,7 @@ public class TweetCrawler {
 					Elements tweetEs = element.getElementsByClass("tweet-text");
 					for (Element tweetE : tweetEs) {
 						
+						allTweetText.add(tweetE.text());
 						tempO.put("tweet-text", tweetE.text());
 						// CANCHANGE: edit to your output format
 						System.out.println("tweet : " + tweetE.text());
@@ -248,7 +249,6 @@ public class TweetCrawler {
 					}
 					if(tempO.length() != 0) outCompile.append(tempO.toString()+"\n");
 					
-					jsonAllContent.add(tempO);
 				}
 				out.close();
 				
@@ -260,7 +260,7 @@ public class TweetCrawler {
 			}
 
 		}
-		return jsonAllContent;
+		return allTweetText;
 
 	}
 

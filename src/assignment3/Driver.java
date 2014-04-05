@@ -76,10 +76,10 @@ public class Driver {
 			LocalDate querySince = matchDate.minusDays(3);
 			LocalDate queryUntil = matchDate.plusDays(3);
 			
-			List<JSONObject> homeTeamResult = crawlOneTerm(soccerMatch.getHomeTeam().replaceAll(" ", "%20"),
+			List<String> homeTeamTweets = crawlOneTerm(soccerMatch.getHomeTeam().replaceAll(" ", "%20"),
 					querySince.toString(), queryUntil.toString());
 			
-			List<JSONObject> awayTeamResult = crawlOneTerm(soccerMatch.getAwayTeam().replaceAll(" ", "%20"),
+			List<String> awayTeamTweets = crawlOneTerm(soccerMatch.getAwayTeam().replaceAll(" ", "%20"),
 					querySince.toString(), queryUntil.toString());
 			
 			String outputFile = "try-oneJson";
@@ -88,7 +88,7 @@ public class Driver {
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			
-			writer.write(assembleOneMatchJson(soccerMatch, homeTeamResult, awayTeamResult).toString());
+			writer.write(assembleOneMatchJson(soccerMatch, homeTeamTweets, awayTeamTweets).toString());
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -99,20 +99,20 @@ public class Driver {
 	}
 	
 	public static JSONObject assembleOneMatchJson(SoccerMatch soccerMatch,
-			List<JSONObject> homeTeamTweet, List<JSONObject> awayTeamTweet)
+			List<String> homeTeamTweets, List<String> awayTeamTweets)
 			throws JSONException {
 		
 		JSONObject jsonMatch = new JSONObject();
 		JSONObject jsonSoccerMatch = new JSONObject(soccerMatch);
 		
 		jsonMatch.put("Match Details", jsonSoccerMatch);
-		jsonMatch.put(soccerMatch.getHomeTeam(), homeTeamTweet);
-		jsonMatch.put(soccerMatch.getAwayTeam(), awayTeamTweet);
+		jsonMatch.put(soccerMatch.getHomeTeam(), homeTeamTweets);
+		jsonMatch.put(soccerMatch.getAwayTeam(), awayTeamTweets);
 		
 		return jsonMatch;
 	}
 	
-	public static List<JSONObject> crawlOneTerm(String query, String sinceDate, String untilDate){
+	public static List<String> crawlOneTerm(String query, String sinceDate, String untilDate){
 		TweetCrawler tweetCrawler = new TweetCrawler(query, sinceDate, untilDate);
 		return tweetCrawler.testIt();
 	}
