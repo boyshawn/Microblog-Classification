@@ -44,6 +44,14 @@ public class TweetCrawler{
 	String sinceDate;
 	String untilDate;
 	
+	public static List<String> crawlOneTerm(String query, String sinceDate,
+			String untilDate) {
+		
+		TweetCrawler tweetCrawler = new TweetCrawler(query, sinceDate,
+				untilDate);
+		return tweetCrawler.testIt();
+	}
+	
 	public TweetCrawler(String query, String sinceDate, String untilDate){
 		this.query = query;
 		this.sinceDate = sinceDate;
@@ -54,7 +62,6 @@ public class TweetCrawler{
 				+ "since%3A" + this.sinceDate + "%20"
 				+ "until%3A" + this.untilDate + "%20"
 				+ "lang%3Aen%20"
-				+ "include%3Aretweets%20"
 				+ "&src=typd"
 				+ "&f=realtime&scroll_cursor=";
 	}
