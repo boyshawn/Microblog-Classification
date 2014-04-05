@@ -46,45 +46,14 @@ public class Driver {
 		double timeTaken = (endTime - startTime)/ 100;
 		System.out.println("Total execution time: " + timeTaken );
 	}
-
-
-
-	public static void main(String[] args) throws IOException{
-		final long startTime = System.currentTimeMillis();
+	
+	public static void main(String[] args){
+		String query = "Fulham FC";
+		int stopDate = 14;
+		int stopMonth = 3;
 		
-		String gogogo = "15/3/2014	15:00	Fulham FC	-	Newcastle United	1:0 (0:0) ";
-				
-		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-		configurationBuilder.setJSONStoreEnabled(true);
+		TweetCrawler tweetCrawler = new TweetCrawler(query, stopMonth, stopDate);
+		tweetCrawler.testIt();
 		
-		configurationBuilder.setOAuthConsumerKey("cWi74LP44GSXTx9g2yCIY4Tyu");
-		configurationBuilder.setOAuthConsumerSecret("AnQQX6O6LdY4oQHFBlwMl9rJZcQLgATon62aJmOh8mKjxs3L73");
-		configurationBuilder.setOAuthAccessToken("2425629150-shkCsUbbsdgr3HuOGPGCO7j1YEqFRWwRIMXqgt8");
-		configurationBuilder.setOAuthAccessTokenSecret("C8CMYzgM5WOhLIa8NWNNYmB59N3JZUqkAaD7bfKuubp6s");
-		
-		SoccerMatch soccerMatch = SoccerMatch.extractOneSoccerMatch(gogogo);
-		try {
-			JSONObject oneMatch = TweetSearch.searchTweetForMatch(soccerMatch, 3,
-					3, 100, configurationBuilder.build());
-			
-			File directory = new File("Resource");
-			File outFile = new File(directory, "oneMatch");
-			
-			if(!outFile.exists()){
-				outFile.createNewFile();
-			}
-			
-			BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-			writer.write(oneMatch.toString(4));
-			
-		} catch (TwitterException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		final long endTime = System.currentTimeMillis();
-		double timeTaken = (endTime - startTime)/ 1000;
-		System.out.println("Total execution time: " + timeTaken );
 	}
 }
