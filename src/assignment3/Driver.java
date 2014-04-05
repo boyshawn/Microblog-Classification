@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Driver {
 
@@ -47,13 +50,86 @@ public class Driver {
 		System.out.println("Total execution time: " + timeTaken );
 	}
 	
+	public static void lolo(int[] args){
+		List<SoccerMatch> allMatches;
+		try {
+			allMatches = extractMatchesFromFile("Resource/Queries/Training-Data-2014");
+			
+			SoccerMatch soccerMatch = allMatches.get(0);
+			
+			
+			JSONObject jsonMatch = new JSONObject(soccerMatch);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+	}
+	
 	public static void main(String[] args){
-		String query = "Fulham FC";
-		int stopDate = 14;
-		int stopMonth = 3;
+		try {
+			List<SoccerMatch> allMatches = extractMatchesFromFile("Resource/Queries/Training-Data-2014");
+			
+			SoccerMatch soccerMatch = allMatches.get(0);
+			LocalDate matchDate = soccerMatch.matchDate();
+			LocalDate querySince = matchDate.minusDays(3);
+			LocalDate queryUntil = matchDate.plusDays(3);
+			
+			List<JSONObject> homeTeamResult = crawlOneTerm(soccerMatch.getHomeTeam().replaceAll(" ", "%20"),
+					querySince.toString(), queryUntil.toString());
+			
+			List<JSONObject> awayTeamResult = crawlOneTerm(soccerMatch.getAwayTeam().replaceAll(" ", "%20"),
+					querySince.toString(), queryUntil.toString());
+			
+			String outputFile = "try-oneJson";
+			File file = new File(outputFile);
+			file.createNewFile();
+			
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			
+			writer.write(assembleOneMatchJson(soccerMatch, homeTeamResult, awayTeamResult).toString());
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		
-		TweetCrawler tweetCrawler = new TweetCrawler(query, stopMonth, stopDate);
-		tweetCrawler.testIt();
+	}
+	
+	public static JSONObject assembleOneMatchJson(SoccerMatch soccerMatch,
+			List<JSONObject> homeTeamTweet, List<JSONObject> awayTeamTweet)
+			throws JSONException {
 		
+		JSONObject jsonMatch = new JSONObject();
+		JSONObject jsonSoccerMatch = new JSONObject(soccerMatch);
+		
+		jsonMatch.put("Match Details", jsonSoccerMatch);
+		jsonMatch.put(soccerMatch.getHomeTeam(), homeTeamTweet);
+		jsonMatch.put(soccerMatch.getAwayTeam(), awayTeamTweet);
+		
+		return jsonMatch;
+	}
+	
+	public static List<JSONObject> crawlOneTerm(String query, String sinceDate, String untilDate){
+		TweetCrawler tweetCrawler = new TweetCrawler(query, sinceDate, untilDate);
+		return tweetCrawler.testIt();
+	}
+	
+	public static List<SoccerMatch> extractMatchesFromFile(String filePath) throws IOException{
+		File file = new File(filePath);
+		List<SoccerMatch> soccerMatches = new ArrayList<SoccerMatch>();
+		
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		
+		String line;
+		
+		while( (line=reader.readLine()) != null ){
+			if(!line.startsWith("//")){	//The file can contain comment
+				soccerMatches.add(SoccerMatch.extractOneSoccerMatch(line));
+			}
+		}
+		return soccerMatches;
 	}
 }

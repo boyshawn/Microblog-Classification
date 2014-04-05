@@ -10,7 +10,9 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -26,7 +28,7 @@ public class TweetCrawler {
 	/*
 	 * Change 'query' to  your search term 
 	 */
-	String query = "mufc";
+	String query;
 	/*
 	 * change 'scroll_cursor if you have a point to continue,
 	 * else just leave it blank to get the latest
@@ -34,29 +36,53 @@ public class TweetCrawler {
 	String scroll_cursor = "";
 //	String scroll_cursor = "TWEET-451791255258021888-452148919196450816";
 	
-	String https_url = "https://twitter.com/i/search/timeline?q="+query+"&src=typd&include_available_features=1&include_entities=1&scroll_cursor=";
+	String https_url;
 	String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	int crawlTillMonth, crawlTillDate, stopMonth, stopDate; 
 	String filenameall, filenamecompile;
 	
-	public TweetCrawler(String query, int stopMonth, int stopDate){
+	String sinceDate;
+	String untilDate;
+	
+	public TweetCrawler(String query, String sinceDate, String untilDate){
 		this.query = query;
-		this.stopDate = stopDate; 
-		this.stopMonth = stopMonth;
+		this.sinceDate = sinceDate;
+		this.untilDate = untilDate;
+		
+		this.https_url = "https://twitter.com/i/search/timeline?q="
+				+ this.query + "%20" 
+				+ "since%3A" + this.sinceDate + "%20"
+				+ "until%3A" + this.untilDate + "%20"
+				+ "lang%3Aen%20"
+				+ "include%3Aretweets%20"
+				+ "&src=typd"
+				+ "&f=realtime&scroll_cursor=";
 	}
 	
-	public TweetCrawler(){}
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		new TweetCrawler().testIt();
+	public TweetCrawler(String query, int stopMonth, int stopDate){
+		this.query = query;
+		this.stopMonth = stopMonth;
+		this.stopDate = stopDate; 
+		this.https_url = "https://twitter.com/i/search/timeline?q="
+				+ this.query + "%20" 
+				+ "since%3A2014-03-14%20"
+				+ "until%3A2014-03-17%20"
+				+ "lang%3Aen%20"
+				+ "include%3Aretweets%20"
+				+ "&src=typd"
+				+ "&f=realtime&scroll_cursor=";
+	}
+	
+	public TweetCrawler(){
+		this.query = "mufc";
+		this.stopDate = 1;
+		this.stopMonth = 1;
+		this.https_url = "https://twitter.com/i/search/timeline?q="
+				+ this.query
+				+ "&src=typd&include_available_features=1&include_entities=1&scroll_cursor=";
 	}
 
-	public void testIt() {
-		// Month(1-12) and Date(1-31) to be that of the day to stop, 
-		stopMonth = 4;
-		stopDate = 1;
-		
+	public List<JSONObject> testIt() {
 		// Month(1-12) and Date(1-31) to be that of the first tweet, 
 		crawlTillMonth = 4;
 		crawlTillDate = 5;
@@ -70,24 +96,69 @@ public class TweetCrawler {
 		File fc = new File(filenamecompile);
 		fc.delete();
 		
+		List<JSONObject> jsonAllCrawl = new ArrayList<JSONObject>();
+		
 		try {
 			//to test for one crawl
 //			int round = 1;
 //			while (round-- > 0) {
-			while( (crawlTillMonth>=stopMonth)?(crawlTillDate>=stopDate):false ){
-				System.out.println("____________crawl start____________");
-				crawlURL(scroll_cursor, scroll_cursor + ".html");
-				System.out.println("____________crawl end____________");
+//			boolean continueToCrawl;
+//			
+//			if(crawlTillMonth > stopMonth){
+//				continueToCrawl = true;
+//			}
+//			else if (crawlTillMonth == stopMonth){
+//				if(crawlTillDate > stopDate){
+//					continueToCrawl = true;
+//				}
+//				else{
+//					continueToCrawl = false;
+//				}
+//			}
+//			else{
+//				continueToCrawl = false;
+//			}
+//			
+//			while(continueToCrawl){
+//				System.out.println("____________crawl start____________");
+//				jsonAllCrawl.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
+//				System.out.println(jsonAllCrawl.size());
+//				System.out.println("____________crawl end____________");
+//				
+//				if(crawlTillMonth > stopMonth){
+//					continueToCrawl = true;
+//				}
+//				else if (crawlTillMonth == stopMonth){
+//					if(crawlTillDate > stopDate){
+//						continueToCrawl = true;
+//					}
+//					else{
+//						continueToCrawl = false;
+//					}
+//				}
+//				else{
+//					continueToCrawl = false;
+//				}
+//			}
+			
+			//The HTTP way
+			int oldSize = jsonAllCrawl.size() -1;
+			while(jsonAllCrawl.size() > oldSize && jsonAllCrawl.size()<20){
+				System.out.println(jsonAllCrawl.size());
+				oldSize = jsonAllCrawl.size();
+				jsonAllCrawl.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
 			}
+			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
+		return jsonAllCrawl;
 	}
 
-	private void crawlURL(String scroll_cursor, String filename)
+	public List<JSONObject> crawlURL(String scroll_cursor, String filename)
 			throws IOException {
 		URL url;
 		url = new URL(https_url + scroll_cursor);
@@ -97,11 +168,15 @@ public class TweetCrawler {
 		print_https_cert(con);
 
 		// dump all the content
-		print_content(con, filename);
+		List<JSONObject> jsonAllContent = print_content(con, filename);
+		
+		return jsonAllContent;
 
 	}
 	
-	private void print_content(HttpsURLConnection con, String filename) {
+	private List<JSONObject> print_content(HttpsURLConnection con, String filename) {
+		List<JSONObject> jsonAllContent = new ArrayList<JSONObject>();
+		
 		if (con != null) {
 
 			try {
@@ -165,13 +240,15 @@ public class TweetCrawler {
 					//get tweet text element
 					Elements tweetEs = element.getElementsByClass("tweet-text");
 					for (Element tweetE : tweetEs) {
-
+						
 						tempO.put("tweet-text", tweetE.text());
 						// CANCHANGE: edit to your output format
 						System.out.println("tweet : " + tweetE.text());
 						// *CANCHANGE
 					}
 					if(tempO.length() != 0) outCompile.append(tempO.toString()+"\n");
+					
+					jsonAllContent.add(tempO);
 				}
 				out.close();
 				
@@ -183,6 +260,7 @@ public class TweetCrawler {
 			}
 
 		}
+		return jsonAllContent;
 
 	}
 

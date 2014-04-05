@@ -30,7 +30,7 @@ public class SoccerMatch {
 		this.halfTimeScore = halfTimeScore;
 	}
 
-	public LocalDate getDate() {
+	public LocalDate matchDate() {
 		return date;
 	}
 	

@@ -81,7 +81,7 @@ public class TweetSearch {
 		//query.resultType(ResultType.popular);
 		
 		//Get the match range
-		LocalDate matchDate = soccerMatch.getDate();
+		LocalDate matchDate = soccerMatch.matchDate();
 		LocalDate querySince = matchDate.minusDays(dayBefore);
 		LocalDate queryUntil = matchDate.plusDays(dayAfter);
 		
