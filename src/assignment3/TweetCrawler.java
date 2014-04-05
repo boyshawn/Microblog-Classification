@@ -24,7 +24,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class TweetCrawler {
+public class TweetCrawler{
 	/*
 	 * Change 'query' to  your search term 
 	 */
@@ -143,7 +143,7 @@ public class TweetCrawler {
 			
 			//The HTTP way
 			int oldSize = allTweetTexts.size() -1;
-			while(allTweetTexts.size() > oldSize && allTweetTexts.size()<20){
+			while(allTweetTexts.size() > oldSize){
 				System.out.println(allTweetTexts.size());
 				oldSize = allTweetTexts.size();
 				allTweetTexts.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
