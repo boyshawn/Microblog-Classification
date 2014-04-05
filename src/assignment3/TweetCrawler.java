@@ -24,7 +24,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class TweetCrawler{
+public class TweetCrawler {
 	/*
 	 * Change 'query' to  your search term 
 	 */
@@ -95,58 +95,17 @@ public class TweetCrawler{
 		crawlTillDate = 5;
 
 		// Reset files
-		filenameall = "HTTPS_RESPONSE.html";
+		filenameall = query + sinceDate + "_HTTPS_RESPONSE.html";
 		File f = new File(filenameall);
 		f.delete();
 		
-		filenamecompile = "JSON_COMPILE_TWEETS.txt";
+		filenamecompile = query + sinceDate + "_JSON_COMPILE_TWEETS.txt";
 		File fc = new File(filenamecompile);
 		fc.delete();
 		
 		List<String> allTweetTexts = new ArrayList<String>();
 		
 		try {
-			//to test for one crawl
-//			int round = 1;
-//			while (round-- > 0) {
-//			boolean continueToCrawl;
-//			
-//			if(crawlTillMonth > stopMonth){
-//				continueToCrawl = true;
-//			}
-//			else if (crawlTillMonth == stopMonth){
-//				if(crawlTillDate > stopDate){
-//					continueToCrawl = true;
-//				}
-//				else{
-//					continueToCrawl = false;
-//				}
-//			}
-//			else{
-//				continueToCrawl = false;
-//			}
-//			
-//			while(continueToCrawl){
-//				System.out.println("____________crawl start____________");
-//				jsonAllCrawl.addAll(crawlURL(scroll_cursor, scroll_cursor + ".html"));
-//				System.out.println(jsonAllCrawl.size());
-//				System.out.println("____________crawl end____________");
-//				
-//				if(crawlTillMonth > stopMonth){
-//					continueToCrawl = true;
-//				}
-//				else if (crawlTillMonth == stopMonth){
-//					if(crawlTillDate > stopDate){
-//						continueToCrawl = true;
-//					}
-//					else{
-//						continueToCrawl = false;
-//					}
-//				}
-//				else{
-//					continueToCrawl = false;
-//				}
-//			}
 			
 			//The HTTP way
 			int oldSize = allTweetTexts.size() -1;
@@ -172,7 +131,7 @@ public class TweetCrawler{
 		HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
 		// dumpl all cert info
-		print_https_cert(con);
+		//print_https_cert(con);
 
 		// dump all the content
 		List<String> allTweetText = print_content(con, filename);

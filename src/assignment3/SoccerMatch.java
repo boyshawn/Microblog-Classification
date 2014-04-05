@@ -1,7 +1,5 @@
 package assignment3;
 
-import java.text.SimpleDateFormat;
-
 import org.joda.time.LocalDate;
 
 
