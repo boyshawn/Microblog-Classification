@@ -61,27 +61,6 @@ public class FileHelper {
 		return queries.toArray(new String[queries.size()]);	//Convert list to array
 	}
 
-	public static void writeQueryFileToSingleFolder(String baseDirectory,
-			String queryFilePath, List<Configuration> configurations)
-			throws IOException {
-		File queryFile = new File(queryFilePath);
-
-		//All the query from a query file will be stored in the same directory
-		File queryDirectory = new File(baseDirectory + File.separator + queryFile.getName());
-
-		if(!queryDirectory.isDirectory()){
-			queryDirectory.mkdirs();
-		}
-
-		String[] queries = FileHelper.retriveQueriesTermFromFile(queryFile);
-
-		Map<String, List<JSONObject>> queryResultMap = TweetSearch.multipleQueriesSearch(queries, configurations);
-
-		for(String query : queries){
-			writeToSingleFile(queryDirectory.getAbsolutePath(), query, queryResultMap.get(query));
-		}
-	}
-
 	public static void writeToSingleFile(String baseDirectory, String fileName,
 			List<JSONObject> jsonQueryResult) throws IOException {
 

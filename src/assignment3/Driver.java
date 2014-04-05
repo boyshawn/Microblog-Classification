@@ -32,8 +32,10 @@ public class Driver {
 		}
 	}
 
-	public static void theUltimate(String queryFile, String outputFile,int daysBeforeMatch, int daysAfterMatch)
+	public static void theUltimate(String queryFile, String outputFile,
+			int daysBeforeMatch, int daysAfterMatch)
 			throws IOException, JSONException {
+		
 			List<SoccerMatch> allMatches = extractMatchesFromFile(queryFile);
 
 			File file = new File(outputFile);
@@ -52,7 +54,8 @@ public class Driver {
 			writer.close();
 	}
 
-	public static JSONObject assembleOneMatchJson(SoccerMatch soccerMatch, int daysBeforeMatch, int daysAfterMatch)
+	public static JSONObject assembleOneMatchJson(SoccerMatch soccerMatch,
+			int daysBeforeMatch, int daysAfterMatch)
 			throws JSONException {
 
 		LocalDate matchDate = soccerMatch.matchDate();
@@ -75,12 +78,17 @@ public class Driver {
 		return jsonMatch;
 	}
 
-	public static List<String> crawlOneTerm(String query, String sinceDate, String untilDate){
-		TweetCrawler tweetCrawler = new TweetCrawler(query, sinceDate, untilDate);
+	public static List<String> crawlOneTerm(String query, String sinceDate,
+			String untilDate) {
+		
+		TweetCrawler tweetCrawler = new TweetCrawler(query, sinceDate,
+				untilDate);
 		return tweetCrawler.testIt();
 	}
 
-	public static List<SoccerMatch> extractMatchesFromFile(String filePath) throws IOException{
+	public static List<SoccerMatch> extractMatchesFromFile(String filePath)
+			throws IOException {
+		
 		File file = new File(filePath);
 		List<SoccerMatch> soccerMatches = new ArrayList<SoccerMatch>();
 
